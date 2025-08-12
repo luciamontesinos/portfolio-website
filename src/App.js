@@ -1151,7 +1151,7 @@ function CV() {
   useEffect(() => {
     const fetchMarkdown = async () => {
       try {
-        const response = await fetch("/cv.md"); // Path to the markdown file
+        const response = await fetch("cv.md"); // Path to the markdown file
         if (!response.ok) {
           console.error(`Failed to fetch CV: ${response.status}`);
           return;
