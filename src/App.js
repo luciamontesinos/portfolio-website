@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import styled, { createGlobalStyle } from "styled-components";
 import ProjectDetails from "./ProjectDetails";
 import { projectList, socialLinks, citiesList, cvList } from "./data"; // Import the citiesList
-import { Link, BrowserRouter as Router } from "react-router-dom"; // Use BrowserRouter instead of Router
+import { HashRouter as Router, Link } from "react-router-dom"; // Use BrowserRouter instead of Router
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
