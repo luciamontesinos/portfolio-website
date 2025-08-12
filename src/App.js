@@ -14,13 +14,13 @@ import '@splidejs/splide/css';
 
 const GlobalStyle = createGlobalStyle`
   @font-face {
-    font-family: 'TerminalGrotesque';
-    src: url('/fonts/terminal-grotesque.ttf') format('truetype');
-  }
-  @font-face {
-    font-family: 'StandardBook';
-    src: url('/fonts/standard-book-webfont.ttf') format('truetype');
-  }
+  font-family: 'TerminalGrotesque';
+  src: url('fonts/terminal-grotesque.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'StandardBook';
+  src: url('fonts/standard-book-webfont.ttf') format('truetype');
+}
   body {
     background: #121212;
     color: white;
