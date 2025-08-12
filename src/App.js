@@ -418,11 +418,11 @@ const DropdownRow = styled.div`
   box-sizing: border-box; /* Include padding in the width */
 `;
 
-const ArrowColumn = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
+// const ArrowColumn = styled.div`
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// `;
 
 const DetailsColumn = styled.div`
   color: white;
