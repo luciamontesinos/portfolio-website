@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+//import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import styled, { createGlobalStyle } from "styled-components";
-import ProjectDetails from "./ProjectDetails";
-import { projectList, socialLinks, citiesList, cvList } from "./data"; // Import the citiesList
-import { HashRouter as Router, Link } from "react-router-dom"; // Use BrowserRouter instead of Router
+//import ProjectDetails from "./ProjectDetails";
+import { projectList, socialLinks, citiesList } from "./data"; // Import the citiesList
+import { HashRouter as Router } from "react-router-dom"; // Use BrowserRouter instead of Router
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import Slider from "react-slick";
+//import Slider from "react-slick";
 import { Splide, SplideSlide } from "@splidejs/react-splide"; // Import Splide components
 import "@splidejs/react-splide/css"; // Import Splide styles
 import '@splidejs/splide/css';
@@ -273,19 +273,19 @@ const StyledFilterButton = styled.button`
   }
 `;
 
-const StyledButton = styled.button`
-  padding: 8px 12px;
-  margin-right: 5px;
-  border: none;
-  border-radius: 5px;
-  background: green;
-  color: white;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  &:hover {
-    background: darkgreen;
-  }
-`;
+// const StyledButton = styled.button`
+//   padding: 8px 12px;
+//   margin-right: 5px;
+//   border: none;
+//   border-radius: 5px;
+//   background: green;
+//   color: white;
+//   cursor: pointer;
+//   transition: background 0.3s ease;
+//   &:hover {
+//     background: darkgreen;
+//   }
+// `;
 
 const StyledCard = styled.div`
   display: flex;
@@ -338,42 +338,42 @@ const TagContainer = styled.div`
   }
 `;
 
-const TagContainerRow = styled.div`
-  display: flex;
-  flex-wrap: wrap; /* Allow tags to wrap if they exceed the width */
-  gap: 8px; /* Space between tags */
-  width: 100%; /* Make it span the full width of the parent */
-  margin-top: 8px;
-  justify-content: flex-start; /* Align tags to the left */
-  align-items: center;
-`;
+// const TagContainerRow = styled.div`
+//   display: flex;
+//   flex-wrap: wrap; /* Allow tags to wrap if they exceed the width */
+//   gap: 8px; /* Space between tags */
+//   width: 100%; /* Make it span the full width of the parent */
+//   margin-top: 8px;
+//   justify-content: flex-start; /* Align tags to the left */
+//   align-items: center;
+// `;
 
 
 
-const DropdownContent = styled.div`
-  margin-top: 16px;
-  padding: 16px;
-  color: white;
-  font-size: 14px;
-`;
+// const DropdownContent = styled.div`
+//   margin-top: 16px;
+//   padding: 16px;
+//   color: white;
+//   font-size: 14px;
+// `;
 
-const ArrowButton = styled.button`
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 40px;
-  cursor: pointer;
-  margin-right: 8px;
-  &:hover {
-    color: red;
-  }
+// const ArrowButton = styled.button`
+//   background: transparent;
+//   border: none;
+//   color: white;
+//   font-size: 40px;
+//   cursor: pointer;
+//   margin-right: 8px;
+//   &:hover {
+//     color: red;
+//   }
 
-   @media (max-width: 768px) {
-    font-size: 28px; 
-    margin-right: 4px;
-  }
+//    @media (max-width: 768px) {
+//     font-size: 28px; 
+//     margin-right: 4px;
+//   }
 
-`;
+// `;
 
 const ListRow = styled.div`
   display: flex;
@@ -521,42 +521,42 @@ const HoverInfo = styled.div`
   z-index: 10;
 `;
 
-const TimeBox = styled.div`
-  width: 40px; /* Fixed width for each box */
-  height: 50px; /* Fixed height for each box */
-  background: #000; /* Black background for retro look */
-  color: #00ff00; /* Green text for retro digital clock style */
-  font-family: 'TerminalGrotesque', monospace; /* Use the existing retro font */
-  font-size: 24px; /* Adjust font size for the clock */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+// const TimeBox = styled.div`
+//   width: 40px; /* Fixed width for each box */
+//   height: 50px; /* Fixed height for each box */
+//   background: #000; /* Black background for retro look */
+//   color: #00ff00; /* Green text for retro digital clock style */
+//   font-family: 'TerminalGrotesque', monospace; /* Use the existing retro font */
+//   font-size: 24px; /* Adjust font size for the clock */
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   text-align: center;
+//   border-radius: 4px;
+//   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 
-  /* Create the split effect for the flip clock */
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 50%;
-    background: #000;
-    z-index: -1;
-  }
+//   /* Create the split effect for the flip clock */
+//   &::before,
+//   &::after {
+//     content: "";
+//     position: absolute;
+//     left: 0;
+//     width: 100%;
+//     height: 50%;
+//     background: #000;
+//     z-index: -1;
+//   }
 
-  &::before {
-    top: 0;
-    border-bottom: 2px solid #333; /* Line separating the top and bottom sections */
-  }
+//   &::before {
+//     top: 0;
+//     border-bottom: 2px solid #333; /* Line separating the top and bottom sections */
+//   }
 
-  &::after {
-    bottom: 0;
-    border-top: 2px solid #333; /* Line separating the top and bottom sections */
-  }
-`;
+//   &::after {
+//     bottom: 0;
+//     border-top: 2px solid #333; /* Line separating the top and bottom sections */
+//   }
+// `;
 
 const CVContainer = styled.div`
   display: grid;
@@ -718,68 +718,68 @@ function Navigation() {
   );
 }
 
-function Home() {
-  const images = [
-    { src: "/images/tubularium1.png", projectId: "1" }, // Replace with your project IDs
-    { src: "/images/ericophone1.jpg", projectId: "2" },
-  ];
-  const urlPrefix = "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev";
+// function Home() {
+//   const images = [
+//     { src: "/images/tubularium1.png", projectId: "1" }, // Replace with your project IDs
+//     { src: "/images/ericophone1.jpg", projectId: "2" },
+//   ];
+//   const urlPrefix = "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev";
 
-  return (
-    <Section id="home">
-      <h1>Highlights</h1>
-      <Splide
-        options={{
-          type: "loop",
-          perPage: 1,
-          perMove: 1,
-          autoplay: true,
-          interval: 3000,
-          pauseOnHover: true,
-          arrows: true,
-          pagination: true,
-          gap: "16px",
-          height: "25rem",
-          updateOnMove: true,
-          breakpoints: {
-            1024: {
-              perPage: 2,
-            },
-            768: {
-              perPage: 1,
-            },
-          },
-        }}
-        onMove={(splide) => {
-          // Move focus to the active slide
-          const activeSlide = splide.Components.Elements.slides[splide.index];
-          if (activeSlide) {
-            activeSlide.focus();
-          }
-        }}
-      >
-        {images.map((image, index) => (
-          <SplideSlide key={index}>
-            {/* <a href={`#projects?project=${image.projectId}`} style={{ textDecoration: "none" }}> */}
-            <img
+//   return (
+//     <Section id="home">
+//       <h1>Highlights</h1>
+//       <Splide
+//         options={{
+//           type: "loop",
+//           perPage: 1,
+//           perMove: 1,
+//           autoplay: true,
+//           interval: 3000,
+//           pauseOnHover: true,
+//           arrows: true,
+//           pagination: true,
+//           gap: "16px",
+//           height: "25rem",
+//           updateOnMove: true,
+//           breakpoints: {
+//             1024: {
+//               perPage: 2,
+//             },
+//             768: {
+//               perPage: 1,
+//             },
+//           },
+//         }}
+//         onMove={(splide) => {
+//           // Move focus to the active slide
+//           const activeSlide = splide.Components.Elements.slides[splide.index];
+//           if (activeSlide) {
+//             activeSlide.focus();
+//           }
+//         }}
+//       >
+//         {images.map((image, index) => (
+//           <SplideSlide key={index}>
+//             {/* <a href={`#projects?project=${image.projectId}`} style={{ textDecoration: "none" }}> */}
+//             <img
 
-              src={image.src}
-              alt={`Slide ${index + 1}`}
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "10px",
-                objectFit: "contain",
-                cursor: "pointer",
-              }}
-            />
-            {/* </a> */}
-          </SplideSlide>
-        ))}
-      </Splide>
-    </Section>
-  );
-}
+//               src={image.src}
+//               alt={`Slide ${index + 1}`}
+//               style={{
+//                 width: "100%",
+//                 height: "100%",
+//                 borderRadius: "10px",
+//                 objectFit: "contain",
+//                 cursor: "pointer",
+//               }}
+//             />
+//             {/* </a> */}
+//           </SplideSlide>
+//         ))}
+//       </Splide>
+//     </Section>
+//   );
+// }
 
 function Projects() {
   const [selectedTag, setSelectedTag] = useState(null);
@@ -787,7 +787,7 @@ function Projects() {
   const [projectContent, setProjectContent] = useState({}); // Store content of each project
   const [projectMedia, setProjectMedia] = useState({}); // Store media URLs for each project
   const [isFilterVisible, setIsFilterVisible] = useState(false); // Track filter visibility
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false); // Track if a video is playing
+  const [isVideoPlaying] = useState(false); // Track if a video is playing
 
 
 
@@ -1031,15 +1031,15 @@ function Projects() {
   );
 }
 
-const AboutContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr; 
-  gap: 16px;
+// const AboutContainer = styled.div`
+//   display: grid;
+//   grid-template-columns: 1fr; 
+//   gap: 16px;
 
-  @media (min-width: 768px) {
-    grid-template-columns: 4fr 8fr; 
-  }
-`;
+//   @media (min-width: 768px) {s
+//     grid-template-columns: 4fr 8fr; 
+//   }
+// `;
 
 const AboutRow = styled.div`
   display: contents;
