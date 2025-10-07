@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-//import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import styled, { createGlobalStyle } from "styled-components";
-//import ProjectDetails from "./ProjectDetails";
+import styled, { createGlobalStyle, ThemeProvider } from "styled-components";
 import { projectList, socialLinks, citiesList } from "./data"; // Import the citiesList
 import { HashRouter as Router } from "react-router-dom"; // Use BrowserRouter instead of Router
 import "slick-carousel/slick/slick.css";
@@ -11,6 +9,17 @@ import "slick-carousel/slick/slick-theme.css";
 import { Splide, SplideSlide } from "@splidejs/react-splide"; // Import Splide components
 import "@splidejs/react-splide/css"; // Import Splide styles
 import '@splidejs/splide/css';
+
+const darkTheme = {
+  background: "#121212",
+  color: "white",
+  border: "white",
+};
+const lightTheme = {
+  background: "white",
+  color: "#121212",
+  border: "#121212",
+};
 
 const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -22,8 +31,8 @@ const GlobalStyle = createGlobalStyle`
   src: url('fonts/standard-book-webfont.ttf') format('truetype');
 }
   body {
-    background: #121212;
-    color: white;
+    background: ${({ theme }) => theme.background};
+    color: ${({ theme }) => theme.color};
     font-family: 'StandardBook', sans-serif;
     margin: 0;
     padding: 0;
@@ -56,7 +65,7 @@ const GlobalStyle = createGlobalStyle`
 
   }
   a {
-    color: white;
+    color: ${({ theme }) => theme.color};
     text-decoration: none;
     transition: color 0.3s ease;
     &:hover {
@@ -141,7 +150,7 @@ const BurgerMenu = styled.div`
   div {
     width: 100%;
     height: 3px;
-    background: white;
+    background: ${({ theme }) => theme.color};
     border-radius: 2px;
     transition: transform 0.3s ease, opacity 0.3s ease;
 
@@ -182,7 +191,7 @@ const NavLinks = styled.nav`
     position: absolute;
     top: 60px;
     right: 0;
-    background: #121212;
+    background: ${({ theme }) => theme.background};;
     padding: 16px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -1307,6 +1316,26 @@ function Publications() {
   );
 }
 
+const ThemeToggleButton = styled.button`
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 2000;
+  background: transparent;
+  color: red;
+  border: 2px solid red;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover {
+    background: red;
+    color: white;
+  }
+`;
+
 function ScrollToTop() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1315,9 +1344,17 @@ function ScrollToTop() {
 }
 
 function App() {
+  const [theme, setTheme] = useState("dark");
+  const themeObj = theme === "dark" ? darkTheme : lightTheme;
+
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+
   return (
-    <Router>
+    <ThemeProvider theme={themeObj}>
       <GlobalStyle />
+      <ThemeToggleButton onClick={toggleTheme} title="Toggle theme">
+        {theme === "dark" ? "☀️" : "🌙"}
+      </ThemeToggleButton>
       <ContentWrapper>
         <Navigation />
         <SectionsContainer>
@@ -1330,7 +1367,7 @@ function App() {
         </SectionsContainer>
         <ScrollToTop />
       </ContentWrapper>
-    </Router>
+    </ThemeProvider>
   );
 }
 

@@ -1,4 +1,7 @@
 # Teaching
+- 2025, Guest lecture on *AI and Aesthetics* for the course *Designing Aestehtic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
+
+- 2025, Guest lecture on *Prototyping with electronics* for the course *Designing Aestehtic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
 
 - 2025, Guest lecture on *Prototyping with Technology* for the course *CTEC700 Space, Image and Sound* of the Bachelors in Creative Technologies at Auckland University of Technology.
 
@@ -7,6 +10,7 @@
 - 2023, Guest lecture on *AI and Aesthetics* for the course *Designing Aestehtic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
 
 # Supervising
+- 2025, Supervisor of Research Project (7.5 ECTS) for 1 student enroled in the MSc in Software Design at IT University of Copenhagen. *"GenAI Planetary Personas".*
 
 - 2024, Supervisor of Research Project (7.5 ECTS) for 1 student enroled in the MSc in Computer Science at IT University of Copenhagen. *"Making Harmony Accessible for Non-musicians through Virtual Means".*
 
