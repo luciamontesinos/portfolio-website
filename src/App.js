@@ -9,6 +9,7 @@ import "slick-carousel/slick/slick-theme.css";
 import { Splide, SplideSlide } from "@splidejs/react-splide"; // Import Splide components
 import "@splidejs/react-splide/css"; // Import Splide styles
 import '@splidejs/splide/css';
+import { useTheme } from "styled-components";
 
 const darkTheme = {
   background: "#121212",
@@ -29,6 +30,9 @@ const GlobalStyle = createGlobalStyle`
 @font-face {
   font-family: 'StandardBook';
   src: url('fonts/standard-book-webfont.ttf') format('truetype');
+}
+  *, *::before, *::after {
+  box-sizing: border-box;
 }
   body {
     background: ${({ theme }) => theme.background};
@@ -191,7 +195,7 @@ const NavLinks = styled.nav`
     position: absolute;
     top: 60px;
     right: 0;
-    background: ${({ theme }) => theme.background};;
+    background: ${({ theme }) => theme.background};
     padding: 16px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -213,8 +217,7 @@ const SectionsContainer = styled.div`
 `;
 
 const Section = styled.div`
-  min-height: 100vh;
-  width: 100%;
+    width: 100%;
   padding: 5%;
   margin-top: 0%;
 `;
@@ -234,16 +237,16 @@ const FilterToggleButton = styled.button`
   display: none;
   padding: 8px 16px;
   font-size: 14px;
- color: ${({ isSelected }) => (isSelected ? "red" : "white")};
+ color: ${({ isSelected, theme }) => (isSelected ? "red" : theme.color)};
   background: transparent;
-  border: 1px solid ${({ isSelected }) => (isSelected ? "red" : "white")};
+  border: 1px solid ${({ isSelected, theme }) => (isSelected ? "red" : theme.color)};
   border-radius: 24px;
   cursor: pointer;
   margin-bottom: 8px;
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   &:hover {
     background: transparent;
-    color: red;
+    //color: red;
     border-color: red;
   }
 
@@ -262,9 +265,9 @@ const FilterToggleButton = styled.button`
 const StyledFilterButton = styled.button`
   padding: 8px 16px;
   font-size: 14px;
-  color: ${({ isSelected }) => (isSelected ? "red" : "white")};
+  color: ${({ isSelected, theme }) => (isSelected ? "red" : theme.color)};
   background: transparent;
-  border: 1px solid ${({ isSelected }) => (isSelected ? "red" : "white")};
+  border: 1px solid ${({ isSelected, theme }) => (isSelected ? "red" : theme.color)};
   border-radius: 24px;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
@@ -299,9 +302,9 @@ const StyledFilterButton = styled.button`
 const StyledCard = styled.div`
   display: flex;
   flex-direction: column; 
-  border-bottom: 1px solid white; 
+  border-bottom: 1px solid ${({ theme }) => theme.color};
   padding: 16px 0;
-  color: white;
+  color: ${({ theme }) => theme.color};
 
   p1 {      
 `;
@@ -310,7 +313,7 @@ const ScrollToTopButton = styled.button`
   position: fixed;
   bottom: 20px;
   right: 20px;
-  color: white;
+  color: ${({ theme }) => theme.color};;
   border: none;
   padding: 10px;
   background: transparent;
@@ -399,7 +402,7 @@ const ListRow = styled.div`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: ${({ isexpanded }) => (isexpanded ? "red" : "white")};
+    color: ${({ isexpanded, theme }) => (isexpanded ? "red" : theme.color)};
   }
 
   p {
@@ -407,7 +410,7 @@ const ListRow = styled.div`
     flex: 1;
     white-space: nowrap;
     
-     color: ${({ isexpanded }) => (isexpanded ? "red" : "white")}; 
+     color: ${({ isexpanded, theme }) => (isexpanded ? "red" : theme.color)}; 
   }
      p1 {
     margin: 0 16px;
@@ -415,7 +418,7 @@ const ListRow = styled.div`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-     color: ${({ isexpanded }) => (isexpanded ? "red" : "white")}; 
+     color: ${({ isexpanded, theme }) => (isexpanded ? "red" : theme.color)}; 
   }
 `;
 
@@ -434,13 +437,13 @@ const DropdownRow = styled.div`
 // `;
 
 const DetailsColumn = styled.div`
-  color: white;
+  color: ${({ theme }) => theme.color};
   font-size: 14px;
  
   grid-template-columns: 4fr 8fr; /* Two columns: one for h2 and one for p */
   gap: 16px; /* Space between columns */
   text-align: justify;
-  color: white;
+  color: ${({ theme }) => theme.color};
   max-width: 100%;
   display: flex;
   flex-wrap: wrap;
@@ -495,7 +498,7 @@ const SocialLinkRow = styled.div`
   }
 
   a {
-    color: white;
+    color: ${({ theme }) => theme.color};
     text-decoration: none;
     transition: color 0.3s ease;
     &:hover {
@@ -505,7 +508,7 @@ const SocialLinkRow = styled.div`
 `;
 
 const SocialLink = styled.a`
-  color: white;
+  color: ${({ theme }) => theme.color};
   text-decoration: none;
   transition: color 0.3s ease;
   &:hover {
@@ -524,7 +527,7 @@ const HoverInfo = styled.div`
   top: -20px; /* Position above the city name */
   left: 0;
   background: transparent; /* Transparent background */
-  color: white; /* White text for the organization */
+  color: ${({ theme }) => theme.color}; /* White text for the organization */
   font-size: 14px;
   white-space: nowrap;
   z-index: 10;
@@ -590,7 +593,7 @@ const CVRow = styled.div`
 
   div {
     font-size: 20px;
-    color: white;
+    color: ${({ theme }) => theme.color};
     text-align: justify;
 }
     p {
@@ -627,7 +630,7 @@ const PublicationsList = styled.div`
 
   div {
     font-size: 20px;
-    color: white;
+    color: ${({ theme }) => theme.color};
     text-align: justify;
 }
     p {
@@ -709,6 +712,7 @@ function Navigation() {
         <h1>Lucía Montesinos</h1>
         <h3>PhD Fellow | Creative Technologist</h3>
       </NameContainer>
+     
       <BurgerMenu onClick={toggleMenu} isMenuOpen={isMenuOpen}>
         <div />
         <div />
@@ -716,12 +720,11 @@ function Navigation() {
       </BurgerMenu>
       <NavLinks isMenuOpen={isMenuOpen}>
         {/* <a href="#home" onClick={closeMenu}>Home</a> */}
-
-        <a href="#projects" onClick={closeMenu}>Projects</a>
         <a href="#about" onClick={closeMenu}>About Me</a>
-        <a href="#contact" onClick={closeMenu}>Contact</a>
-        <a href="#cv" onClick={closeMenu}>CV</a>
         <a href="#publications" onClick={closeMenu}>Publications</a>
+        <a href="#projects" onClick={closeMenu}>Projects</a>
+        <a href="#cv" onClick={closeMenu}>CV</a>
+        <a href="#contact" onClick={closeMenu}>Contact</a>
       </NavLinks>
     </Navbar>
   );
@@ -791,7 +794,7 @@ function Navigation() {
 // }
 
 function Projects() {
-  const [selectedTag, setSelectedTag] = useState(null);
+  const [selectedTags, setSelectedTags] = useState([]);
   const [expandedProject, setExpandedProject] = useState(null); // Track which project is expanded
   const [projectContent, setProjectContent] = useState({}); // Store content of each project
   const [projectMedia, setProjectMedia] = useState({}); // Store media URLs for each project
@@ -829,11 +832,11 @@ function Projects() {
     return acc;
   }, {});
 
-  const filteredProjects = selectedTag
-    ? projectList
-      .filter((p) => p.tags.includes(selectedTag))
-      .sort((a, b) => b.year - a.year) // Sort by year descending
-    : projectList.sort((a, b) => b.year - a.year); // Sort by year descending
+  const filteredProjects = selectedTags.length > 0
+  ? projectList
+      .filter((p) => selectedTags.every(tag => p.tags.includes(tag)))
+      .sort((a, b) => b.year - a.year)
+  : projectList.sort((a, b) => b.year - a.year); // Sort by year descending
 
   const toggleExpand = async (projectId, file) => {
     if (expandedProject === projectId) {
@@ -903,18 +906,35 @@ function Projects() {
         {isFilterVisible ? "Hide Filters" : "Filter"}
       </FilterToggleButton>
       <FilterContainer isVisible={isFilterVisible}>
-        {[...tags].sort().map((tag) => (
+        {[...tags].sort((a, b) => {
+      const aNum = !isNaN(Number(a));
+      const bNum = !isNaN(Number(b));
+      if (aNum && bNum) {
+        // Both numbers: sort descending
+        return Number(b) - Number(a);
+      }
+      if (aNum) return -1; // Numbers before strings
+      if (bNum) return 1;
+      // Both strings: sort alphabetically
+      return a.localeCompare(b);
+    }).map((tag) => (
           <StyledFilterButton
             key={tag}
-            isSelected={selectedTag === tag}
-            onClick={() => setSelectedTag(tag)}
+            isSelected={selectedTags.includes(tag)}
+            onClick={() => {
+              setSelectedTags((prev) =>
+                prev.includes(tag)
+                  ? prev.filter((t) => t !== tag) // Remove if already selected
+                  : [...prev, tag]                // Add if not selected
+              );
+            }}
           >
             {tag} <span>{tagCounts[tag]}</span>
           </StyledFilterButton>
         ))}
         <StyledFilterButton
-          isSelected={!selectedTag}
-          onClick={() => setSelectedTag(null)}
+          isSelected={selectedTags.length === 0}
+          onClick={() => setSelectedTags([])}
         >
           See all <span>{projectList.length}</span>
         </StyledFilterButton>
@@ -937,7 +957,7 @@ function Projects() {
                   key={tag}
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent triggering the dropdown toggle
-                    setSelectedTag(tag);
+                    setSelectedTags(tag);
                   }}
                 >
                   {tag}
@@ -963,7 +983,7 @@ function Projects() {
                         margin: "0 auto",
                       }}
                       options={{
-                        type: "loop",
+                        type: "slide",
                         perPage: 3,
                         perMove: 1,
                         autoplay: !isVideoPlaying,
@@ -1091,6 +1111,7 @@ function About() {
 }
 
 function Contact() {
+  const theme = useTheme();
   const [hoveredCity, setHoveredCity] = useState(null); // Track the hovered city
 
   const currentCity = citiesList.find((city) => city.isHome); // Find the current city
@@ -1119,7 +1140,7 @@ function Contact() {
             onMouseEnter={() => setHoveredCity(currentCity)}
             onMouseLeave={() => setHoveredCity(null)}
           >
-            <span style={{ color: hoveredCity === currentCity ? "red" : "white" }}>
+            <span style={{ color: hoveredCity === currentCity ? "red" : theme.color}}>
               {currentCity.city}
             </span>
             {hoveredCity === currentCity && (
@@ -1135,7 +1156,7 @@ function Contact() {
             >
               <span
                 style={{
-                  color: hoveredCity === city ? "red" : "white",
+                  color: hoveredCity === city ? "red" : theme.color,
                   marginRight: "8px",
                 }}
               >
@@ -1316,23 +1337,53 @@ function Publications() {
   );
 }
 
-const ThemeToggleButton = styled.button`
-  position: fixed;
+const LMIcon = styled.img`
+position: fixed;
   top: 20px;
-  left: 20px;
+  left: 10px;
   z-index: 2000;
   background: transparent;
   color: red;
-  border: 2px solid red;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 50px;
+  height: 50px;
   font-size: 18px;
   cursor: pointer;
   transition: background 0.2s;
   &:hover {
     background: red;
-    color: white;
+    color: theme.color;
+  }
+    @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+
+const ThemeToggleButton = styled.button`
+  position: fixed;
+  bottom: 20px;
+  left: 20px;  
+  z-index: 2000;
+  background: transparent;
+  color: ${({ theme }) => theme.color};
+  border: 2px solid ${({ theme }) => theme.color};
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 28px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover {
+    border-color: red;
+    color: red;
+  }
+    @media (max-width: 768px) {
+    bottom: 4px;
+    left: 4px;
+    font-size: 28px;
   }
 `;
 
@@ -1343,28 +1394,41 @@ function ScrollToTop() {
   return <ScrollToTopButton onClick={scrollToTop}>↑</ScrollToTopButton>;
 }
 
+function ScrollToHome() {
+  const theme = useTheme();
+  const iconSrc = theme.color === "white" ? "/logo192_dark.png" : "/logo192_light.png";
+
+  const handleClick = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return <LMIcon src={iconSrc} alt="LM Icon" onClick={handleClick} />;
+}
+
 function App() {
   const [theme, setTheme] = useState("dark");
   const themeObj = theme === "dark" ? darkTheme : lightTheme;
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+ 
 
   return (
     <ThemeProvider theme={themeObj}>
       <GlobalStyle />
-      <ThemeToggleButton onClick={toggleTheme} title="Toggle theme">
-        {theme === "dark" ? "☀️" : "🌙"}
-      </ThemeToggleButton>
+      <ScrollToHome />
       <ContentWrapper>
-        <Navigation />
+        <Navigation/>
         <SectionsContainer>
           {/* <Home /> */}
-          <Projects />
           <About />
-          <Contact />
-          <CV />
           <Publications />
+          <Projects />
+          <CV />
+          <Contact />
         </SectionsContainer>
+        <ThemeToggleButton onClick={toggleTheme} title="Toggle theme">
+        {theme === "dark" ? "☀︎" : "⏾"}
+      </ThemeToggleButton>
         <ScrollToTop />
       </ContentWrapper>
     </ThemeProvider>

@@ -16,6 +16,7 @@ export const socialLinks = [
   { descriptor: 'linkedin', label: 'luciamontesinos', href: 'https://www.linkedin.com/in/luciamontesinosgarcia/' },
   { descriptor: 'email2', label: 'lulkamoon@gmail.com', href: 'mailto:lulkamoon@gmail.com'},
   { descriptor: 'X', label: '@luciam0ntesin0s', href: 'https://x.com/luciam0ntesin0s' },
+  { descriptor: 'Instagram', label: '@luciam0ntesin0s', href: 'https://www.instagram.com/luciam0ntesin0s' },
   { descriptor: 'mobile', label: '0045 50146685', href: 'tel:+4550146685'}
 ];
 
