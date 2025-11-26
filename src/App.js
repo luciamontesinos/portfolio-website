@@ -897,6 +897,8 @@ function Projects() {
   "/images/ericophone.mp4": "https://www.youtube.com/embed/BpvtZOfE--s",
   "/images/livevisuals.mov": "https://www.youtube.com/embed/dIBtaVdXCPE",
   "/images/recommender.mp4": "https://www.youtube.com/embed/Gi7HCa44ZLw",
+  "/images/picnic.mp4": "https://www.youtube.com/embed/vzOZoCOCKr0?si=ia0198lEJOoc9JzN",
+
 };
 
   return (
@@ -1060,52 +1062,88 @@ function Projects() {
   );
 }
 
-// const AboutContainer = styled.div`
-//   display: grid;
-//   grid-template-columns: 1fr; 
-//   gap: 16px;
+const AboutContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 40px;
+  align-items: start;
 
-//   @media (min-width: 768px) {s
-//     grid-template-columns: 4fr 8fr; 
-//   }
-// `;
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 20px;
+
+     h2 {margin-bottom: 2px;
+    margin-top: 2px;
+    font-size: 15px;}
+    p {font-size: 8px; 
+    margin-top: 5px;
+    margin-bottom: 30px;}
+  }
+    h2 {margin-bottom: 2px;
+    margin-top: 2px;
+    font-size: 35px;}
+    p {font-size: 26px; 
+    margin-top: 5px;
+    margin-bottom: 30px;}
+`;
 
 const AboutRow = styled.div`
   display: contents;
   text-align: justify;
   @media (min-width: 768px) {
     display: grid;
-    grid-template-columns: 4fr 8fr; 
+    grid-template-columns:  8fr; 
     gap: 16px;
   }
 `;
+
+
+
 
 function About() {
   return (
     <Section id="about">
       <h1>About me</h1>
-      <AboutRow>
+      <AboutContainer>
+    
+        <div>
+          <img
+            src={"/aboutme/2025.JPG"}
+            alt={`Me in 2025`}
+            style={{
+              width: "100%",
+              height: "auto",
+              borderRadius: "10px",
+              objectFit: "contain",
+            }}
+          />
+        </div>
 
-        <h2>MY DIGITAL SELF</h2>
-        <p>
-          I am a creative technologist passionate about exploring innovative ways of interacting with digital and physical media.
-          With a technical background and creative inclinations, I thrive in maker spaces and have created a range of interactive
-          experiences for artistic and cultural applications. I am currently pursuing a PhD in Digital Design, driven by my endless
-          curiosity and passion for interaction.
-        </p>
-      </AboutRow>
-      <AboutRow>
-        <h2>MY ANALOG SELF</h2>
-        <p>
-          I was born and raised in Madrid, but I am currently based in Copenhagen. I have always been passionate about music, and
-          since I was 7, it has played a very important role in my life. Back then was when I started to play the drums. As part of
-          that journey, I have been working as a drum teacher for kids, playing semi-professionally in a few bands, composing and
-          recording an album, and playing it live in some venues and events. Nowadays, my music career is a bit calmer, but I still
-          play the drums and I am learning to play the bass. A recent hobby I've been enjoying lately is solving jigsaw puzzles. I
-          know, it doesn't sound as cool as being a rockstar but honestly, If there were such a thing as being a "puzzlestar", I
-          would probably be one.
-        </p>
-      </AboutRow>
+        {/* Right Column - Text */}
+        <div>
+          <AboutRow>
+            <h2>MY DIGITAL SELF</h2>
+            <p>
+              I am a creative technologist passionate about exploring innovative ways of interacting with digital and physical media.
+              With a technical background and creative inclinations, I thrive in maker spaces and have created a range of interactive
+              experiences for artistic and cultural applications. I am currently pursuing a PhD in Digital Design, driven by my endless
+              curiosity and passion for interaction.
+            </p>
+          </AboutRow>
+          <AboutRow>
+            <h2>MY ANALOG SELF</h2>
+            <p>
+              I was born and raised in Madrid, but I am currently based in Copenhagen. I have always been passionate about music, and
+              since I was 7, it has played a very important role in my life. Back then was when I started to play the drums. As part of
+              that journey, I have been working as a drum teacher for kids, playing semi-professionally in a few bands, composing and
+              recording an album, and playing it live in some venues and events. Nowadays, my music career is a bit calmer, but I still
+              play the drums and I am learning to play the bass. A recent hobby I've been enjoying lately is solving jigsaw puzzles. I
+              know, it doesn't sound as cool as being a rockstar but honestly, If there were such a thing as being a "puzzlestar", I
+              would probably be one.
+            </p>
+          </AboutRow>
+        </div>
+      </AboutContainer>
     </Section>
   );
 }
