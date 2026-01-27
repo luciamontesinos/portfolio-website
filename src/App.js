@@ -730,102 +730,180 @@ function Navigation() {
   );
 }
 
-// function Home() {
-//   const images = [
-//     { src: "/images/tubularium1.png", projectId: "1" }, // Replace with your project IDs
-//     { src: "/images/ericophone1.jpg", projectId: "2" },
-//   ];
-//   const urlPrefix = "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev";
+function Home({ setExpandedProject }) {
 
-//   return (
-//     <Section id="home">
-//       <h1>Highlights</h1>
-//       <Splide
-//         options={{
-//           type: "loop",
-//           perPage: 1,
-//           perMove: 1,
-//           autoplay: true,
-//           interval: 3000,
-//           pauseOnHover: true,
-//           arrows: true,
-//           pagination: true,
-//           gap: "16px",
-//           height: "25rem",
-//           updateOnMove: true,
-//           breakpoints: {
-//             1024: {
-//               perPage: 2,
-//             },
-//             768: {
-//               perPage: 1,
-//             },
-//           },
-//         }}
-//         onMove={(splide) => {
-//           // Move focus to the active slide
-//           const activeSlide = splide.Components.Elements.slides[splide.index];
-//           if (activeSlide) {
-//             activeSlide.focus();
-//           }
-//         }}
-//       >
-//         {images.map((image, index) => (
-//           <SplideSlide key={index}>
-//             {/* <a href={`#projects?project=${image.projectId}`} style={{ textDecoration: "none" }}> */}
-//             <img
+  //const urlPrefix = "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev";
+  const highlights = [
+    { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/tubularium1.png", text: "Tubularium - Musicking Artifact I", projectId:9 },
+    { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/picnic4.png", text: "Picnic - Musicking Artifact II" , projectId:10 },
+  ];
 
-//               src={image.src}
-//               alt={`Slide ${index + 1}`}
-//               style={{
-//                 width: "100%",
-//                 height: "100%",
-//                 borderRadius: "10px",
-//                 objectFit: "contain",
-//                 cursor: "pointer",
-//               }}
-//             />
-//             {/* </a> */}
-//           </SplideSlide>
-//         ))}
-//       </Splide>
-//     </Section>
-//   );
-// }
+  
 
-function Projects() {
+  const SlideContainer = styled.div`
+    display: flex;
+    height: 100%;
+    align-items: center;
+    gap: 20px;
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 10px;
+    }
+  `;
+
+  const ImageColumn = styled.div`
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+
+  const TextColumn = styled.div`
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  `;
+
+  const ViewButton = styled.button`
+    background: none;
+    border: none;
+    color: ${({ theme }) => theme.color};
+    font-size: 24px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: color 0.3s ease;
+    &:hover {
+      color: red;
+    }
+  `;
+
+  return (
+    <Section id="home">
+      <Splide
+        options={{
+          type: "loop",
+          perPage: 1,
+          perMove: 1,
+          autoplay: true,
+          interval: 5000,
+          pauseOnHover: true,
+          arrows: true,
+          pagination: true,
+          gap: "16px",
+          height: "30rem",
+          updateOnMove: true,
+          breakpoints: {
+            1024: {
+              perPage: 1,
+            },
+            768: {
+              perPage: 1,
+            },
+          },
+        }}
+        onMove={(splide) => {
+          // Move focus to the active slide
+          const activeSlide = splide.Components.Elements.slides[splide.index];
+          if (activeSlide) {
+            activeSlide.focus();
+          }
+        }}
+      >
+        {highlights.map((highlight, index) => (
+          <SplideSlide key={index}>
+            <SlideContainer>
+              <ImageColumn>
+                <img
+                  src={highlight.image}
+                  alt={highlight.text}
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    maxHeight: "100%",
+                    borderRadius: "10px",
+                    objectFit: "contain",
+                    cursor: "pointer",
+                  }}
+                />
+              </ImageColumn>
+              <TextColumn>
+                <p>{highlight.text}</p>
+                <ViewButton onClick={() => { 
+                  setExpandedProject(highlight.projectId); 
+                  const projectsSection = document.getElementById("projects");
+                  if (projectsSection) {
+                    projectsSection.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}>→</ViewButton>
+              </TextColumn>
+            </SlideContainer>
+          </SplideSlide>
+        ))}
+      </Splide>
+    </Section>
+  );
+}
+
+function Projects({ expandedProject, setExpandedProject }) {
   const [selectedTags, setSelectedTags] = useState([]);
-  const [expandedProject, setExpandedProject] = useState(null); // Track which project is expanded
   const [projectContent, setProjectContent] = useState({}); // Store content of each project
   const [projectMedia, setProjectMedia] = useState({}); // Store media URLs for each project
   const [isFilterVisible, setIsFilterVisible] = useState(false); // Track filter visibility
   const [isVideoPlaying] = useState(false); // Track if a video is playing
 
+  
+
 
 
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash;
-      const projectId = new URLSearchParams(hash.replace("#", "")).get("project");
-      if (projectId) {
-        setExpandedProject(projectId); // Automatically expand the project
-        const projectsSection = document.getElementById("projects");
-        if (projectsSection) {
-          projectsSection.scrollIntoView({ behavior: "smooth" }); // Scroll to the Projects section
-        }
+    if (expandedProject) {
+      const project = projectList.find(p => p.id === expandedProject);
+      if (project && !projectContent[expandedProject]) {
+        (async () => {
+          try {
+            const response = await fetch(project.file);
+            if (!response.ok) return;
+            const text = await response.text();
+            const mediaSection = text.split("## Media")[1];
+              const youtubeVideoMap = {
+  "/images/Tubularium__Demo.mp4": "https://www.youtube.com/embed/X0vxTOJO0Us",
+  "/images/ericophone.mp4": "https://www.youtube.com/embed/BpvtZOfE--s",
+  "/images/livevisuals.mov": "https://www.youtube.com/embed/dIBtaVdXCPE",
+  "/images/recommender.mp4": "https://www.youtube.com/embed/Gi7HCa44ZLw",
+  "/images/picnic.mp4": "https://www.youtube.com/embed/vzOZoCOCKr0?si=ia0198lEJOoc9JzN",
+};
+            let mediaUrls = [];
+            if (mediaSection) {
+              mediaUrls = mediaSection
+                .split("\n")
+                .filter((line) => line.trim().startsWith("![") || line.trim().startsWith("["))
+                .map((line) => {
+                  const match = line.match(/\((.*?)\)/);
+                  if (!match) return null;
+                  const url = match[1];
+                  const isVideo = url.match(/\.(mp4|webm|ogg|mov|MOV)$/i);
+                  if (isVideo && youtubeVideoMap[url]) {
+                    return { type: "video", url: youtubeVideoMap[url] };
+                  }
+                  return { type: "image", url };
+                })
+                .filter(Boolean);
+            }
+            const filteredContent = text.replace(/## Media[\s\S]*/m, "").trim();
+            setProjectContent((prev) => ({ ...prev, [expandedProject]: filteredContent }));
+            setProjectMedia((prev) => ({ ...prev, [expandedProject]: mediaUrls }));
+          } catch (error) {
+            console.error(`Error fetching file: ${project.file}`, error);
+          }
+        })();
       }
-    };
-
-    // Listen for hash changes
-    window.addEventListener("hashchange", handleHashChange);
-
-    // Check the hash on initial load
-    handleHashChange();
-
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-    };
-  }, []);
+      // Update URL
+      window.location.hash = `#projects?project=${expandedProject}`;
+    }
+  }, [expandedProject, projectContent, setProjectContent, setProjectMedia]);
 
   const tagCounts = tags.reduce((acc, tag) => {
     acc[tag] = projectList.filter((project) => project.tags.includes(tag)).length;
@@ -838,72 +916,27 @@ function Projects() {
       .sort((a, b) => b.year - a.year)
   : projectList.sort((a, b) => b.year - a.year); // Sort by year descending
 
-  const toggleExpand = async (projectId, file) => {
+  const toggleExpand = (projectId) => {
     if (expandedProject === projectId) {
       setExpandedProject(null); // Collapse if already expanded
       window.history.replaceState({}, "", window.location.pathname);
-
     } else {
-      // Fetch the markdown content if not already loaded
-      if (!projectContent[projectId]) {
-        try {
-          const response = await fetch(file);
-
-          if (!response.ok) {
-            return;
-          }
-
-          const text = await response.text();
-
-          // Extract media URLs from the "## Media" section
-          const mediaSection = text.split("## Media")[1];
-          let mediaUrls = [];
-          if (mediaSection) {
-            mediaUrls = mediaSection
-              .split("\n")
-              .filter((line) => line.trim().startsWith("![") || line.trim().startsWith("["))
-              .map((line) => {
-                const match = line.match(/\((.*?)\)/);
-                if (!match) return null;
-                const url = match[1];
-                const isVideo = url.match(/\.(mp4|webm|ogg|mov|MOV)$/i);
-                if (isVideo && youtubeVideoMap[url]) {
-                  return { type: "video", url: youtubeVideoMap[url] };
-                }
-                return { type: "image", url };
-              })
-              .filter(Boolean);
-          }
-
-          // Remove the "## Media" section from the markdown content
-          const filteredContent = text.replace(/## Media[\s\S]*/m, "").trim();
-
-          setProjectContent((prev) => ({ ...prev, [projectId]: filteredContent }));
-          setProjectMedia((prev) => ({ ...prev, [projectId]: mediaUrls }));
-          console.log(mediaUrls);
-        } catch (error) {
-          console.error(`Error fetching file: ${file}`, error);
-        }
-      }
       setExpandedProject(projectId); // Expand the selected project
-      window.history.pushState({}, "", `#projects?project=${projectId}`); // Update the URL
-
-
     }
   };
   const urlPrefix = "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev";
-  const youtubeVideoMap = {
-  "/images/Tubularium__Demo.mp4": "https://www.youtube.com/embed/X0vxTOJO0Us",
-  "/images/ericophone.mp4": "https://www.youtube.com/embed/BpvtZOfE--s",
-  "/images/livevisuals.mov": "https://www.youtube.com/embed/dIBtaVdXCPE",
-  "/images/recommender.mp4": "https://www.youtube.com/embed/Gi7HCa44ZLw",
-  "/images/picnic.mp4": "https://www.youtube.com/embed/vzOZoCOCKr0?si=ia0198lEJOoc9JzN",
+//   const youtubeVideoMap = {
+//   "/images/Tubularium__Demo.mp4": "https://www.youtube.com/embed/X0vxTOJO0Us",
+//   "/images/ericophone.mp4": "https://www.youtube.com/embed/BpvtZOfE--s",
+//   "/images/livevisuals.mov": "https://www.youtube.com/embed/dIBtaVdXCPE",
+//   "/images/recommender.mp4": "https://www.youtube.com/embed/Gi7HCa44ZLw",
+//   "/images/picnic.mp4": "https://www.youtube.com/embed/vzOZoCOCKr0?si=ia0198lEJOoc9JzN",
 
-};
+// };
 
   return (
     <Section id="projects">
-      <h1>Projects</h1>
+      <h1 onClick={() => document.getElementById("projects").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>Projects</h1>
       <FilterToggleButton onClick={() => setIsFilterVisible((prev) => !prev)}>
         {isFilterVisible ? "Hide Filters" : "Filter"}
       </FilterToggleButton>
@@ -944,7 +977,7 @@ function Projects() {
       {filteredProjects.map((project) => (
         <StyledCard key={project.id}>
           <ListRow
-            onClick={() => toggleExpand(project.id, project.file)}
+            onClick={() => toggleExpand(project.id)}
             isexpanded={expandedProject === project.id}
           >
             <p>{project.name}</p>
@@ -1103,7 +1136,7 @@ const AboutRow = styled.div`
 function About() {
   return (
     <Section id="about">
-      <h1>About me</h1>
+      <h1 onClick={() => document.getElementById("about").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>About me</h1>
       <AboutContainer>
     
         <div>
@@ -1157,7 +1190,7 @@ function Contact() {
 
   return (
     <Section id="contact">
-      <h1>Contact</h1>
+      <h1 onClick={() => document.getElementById("contact").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>Contact</h1>
 
       <div>
         <p> Get in touch </p>
@@ -1247,7 +1280,7 @@ function CV() {
 
   return (
     <Section id="cv">
-      <h1>CV</h1>
+      <h1 onClick={() => document.getElementById("cv").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>CV</h1>
       {sections.length > 0 ? (
         <CVContainer>
           {sections.map((section, index) => (
@@ -1369,7 +1402,7 @@ function Publications() {
           </ul>
         </PublicationsList>
       ) : (
-        <p>No publications found.</p>
+        <p>No publications found. Weird. I do have some, so maybe try searching for my name in Google Scholar</p>
       )}
     </Section>
   );
@@ -1446,6 +1479,7 @@ function ScrollToHome() {
 function App() {
   const [theme, setTheme] = useState("dark");
   const themeObj = theme === "dark" ? darkTheme : lightTheme;
+  const [expandedProject, setExpandedProject] = useState(null);
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
  
@@ -1457,10 +1491,10 @@ function App() {
       <ContentWrapper>
         <Navigation/>
         <SectionsContainer>
-          {/* <Home /> */}
+          <Home setExpandedProject={setExpandedProject} /> 
           <About />
           <Publications />
-          <Projects />
+          <Projects expandedProject={expandedProject} setExpandedProject={setExpandedProject} />
           <CV />
           <Contact />
         </SectionsContainer>
