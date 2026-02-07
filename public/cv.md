@@ -1,3 +1,27 @@
+# Experience
+- PhD Fellow at IT University of Copenhagen, Denmark (May 2023 - currently)
+
+- Creative Technologist at Schibsted, Oslo, Norway (June - August 2023)
+
+- Creative Technologist Intern at Kaspar AI, Copenhagen, Denmark (March - April 2023)
+
+- Student Mobile App Developer at CACHET (Copenhagen Center for Health Technology), Kongens Lyngby, Denmark (Oct 2020 - Aug 2022)
+
+- Analyst Engineer Trainee at The Cocktail, Madrid, Spain (Oct 2019 - February 2020)
+
+- Game Master at Fox in a Box, Madrid, Spain (September 2018 - January 2019)
+
+- Ride Operator at Kings Dominion, Doswell, Virginia, USA (June - September 2018)
+
+# Education
+- PhD in Interaction Design, IT University of Copenhagen, Denmark (2023 - currently)
+
+- Visiting PhD, Auckland University of Technology, New Zealand (2025)
+
+- MSc in Human-Centered Artificial Intelligence, Technical University of Denmark (2020 - 2022)
+
+- BSc in Software Engineering, Universidad de Tecnología y Arte Digital, Madrid, Spain (2016 - 2020)
+
 # Teaching
 - 2025, Guest lecture on *AI and Aesthetics* for the course *Designing Aestehtic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
 
@@ -21,7 +45,7 @@
 
 # Reviewing
 
-- Conferences: *CHI'25*, *DIS'25*, *NIME'25*, *Creativity and Cognition '24*.
+- Conferences: *DRS'25*, *CHI'25*, *DIS'25*, *NIME'25*, *Creativity and Cognition '24*.
 
 - Journals: *Digital Creativity*.
 

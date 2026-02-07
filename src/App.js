@@ -5,11 +5,13 @@ import { projectList, socialLinks, citiesList } from "./data"; // Import the cit
 //import { HashRouter as Router } from "react-router-dom"; // Use BrowserRouter instead of Router
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-//import Slider from "react-slick";
+import Slider from "react-slick";
 import { Splide, SplideSlide } from "@splidejs/react-splide"; // Import Splide components
 import "@splidejs/react-splide/css"; // Import Splide styles
 import '@splidejs/splide/css';
 import { useTheme } from "styled-components";
+import { useRef } from "react";
+
 
 const darkTheme = {
   background: "#121212",
@@ -625,6 +627,28 @@ const CVRow = styled.div`
   
 `;
 
+const DownloadButton = styled.button`
+  padding: 8px 16px;
+  font-size: 14px;
+  color: ${({ theme }) => theme.color};
+  background: transparent;
+  border: 1px solid ${({ theme }) => theme.color};
+  border-radius: 24px;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  &:hover {
+    background: transparent;
+    color: red;
+    border-color: red;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+`;
+
 const PublicationsList = styled.div`
    text-align: justify;
 
@@ -669,6 +693,218 @@ const SplideWrapper = styled.div`
  
   box-sizing: border-box; /* Include padding and border in the width */
 
+`;
+
+  const ImagePreviewOverlay = styled.div`
+    display: ${({ isOpen }) => (isOpen ? 'flex' : 'none')};
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 2001;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+
+    @media (max-width: 768px) {
+      display: none !important;
+    }
+  `;
+
+  const ImagePreviewContent = styled.div`
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 90vw;
+    max-height: 90vh;
+
+    img {
+      max-width: 100%;
+      max-height: 70vh;
+      object-fit: contain;
+      border-radius: 10px;
+    }
+  `;
+
+  const PreviewCloseButton = styled.button`
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    z-index: 2002;
+
+    &:hover {
+      color: red;
+    }
+  `;
+
+  const PreviewNavigationButton = styled.button`
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+    padding: 15px 20px;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  `;
+
+  const PreviewCounter = styled.div`
+    color: white;
+    font-size: 18px;
+    font-family: 'StandardBook', sans-serif;
+  `;
+
+const CoverflowContainer = styled.div`
+  width: 100%;
+  position: relative;
+  height: 600px;
+  margin: 20px 0;
+  overflow: visible;
+  display: none;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+
+  @media (min-width: 769px) {
+    display: block;
+  }
+`;
+
+const MobileCarouselContainer = styled.div`
+  width: 100%;
+  display: none;
+  margin: 20px 0;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+
+  .swiper {
+    width: 100%;
+    padding: 20px 0;
+  }
+
+  .swiper-slide {
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .swiper-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  .swiper-pagination-bullet {
+    background: ${({ theme }) => theme.color};
+  }
+
+  .swiper-pagination-bullet-active {
+    background: red;
+  }
+`;
+
+const CardStack = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 1000px;
+`;
+
+const DraggableCard = styled.div`
+  position: absolute;
+  width: 350px;
+  height: 450px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  box-shadow: ${({ theme }) => theme.background === '#121212' 
+    ? '0 10px 30px rgba(255, 255, 255, 0.2)' 
+    : '0 10px 30px rgba(0, 0, 0, 0.3)'};
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  &:active {
+    cursor: grabbing;
+    box-shadow: ${({ theme }) => theme.background === '#121212' 
+      ? '0 15px 40px rgba(255, 255, 255, 0.3)' 
+      : '0 15px 40px rgba(0, 0, 0, 0.5)'};
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: white;
+    padding: 20px;
+    border-radius: 0 0 12px 12px;
+    text-align: center;
+  }
+
+  .card-text {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .card-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: red;
+    }
+  }
+
+  @media (max-width: 768px) {
+    width: 280px;
+    height: 350px;
+
+    .card-overlay {
+      padding: 15px;
+    }
+
+    .card-text {
+      font-size: 14px;
+    }
+  }
 `;
 
 function Navigation() {
@@ -731,118 +967,170 @@ function Navigation() {
 }
 
 function Home({ setExpandedProject }) {
-
-  //const urlPrefix = "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev";
   const highlights = [
-    { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/tubularium1.png", text: "Tubularium - Musicking Artifact I", projectId:9 },
-    { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/picnic4.png", text: "Picnic - Musicking Artifact II" , projectId:10 },
+
+    { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/ericophone1.jpg", text: "Conversational User Interface", projectId: 1 },
+    { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/kinetip.png", text: "Interactive Virtual Game based on Gesture and Handwriting Recognition", projectId: 3 },
+        { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/tubularium1.png", text: "Tubularium - Musicking Artifact I", projectId: 9 },
+    { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/picnic4.png", text: "Picnic - Musicking Artifact II", projectId: 10 },
   ];
 
-  
+  const [cards, setCards] = useState(
+    highlights.map((h, i) => ({
+      ...h,
+      id: i,
+      x: Math.random() * 20 - 10, // Slight random offset for stacked effect
+      y: i * 8, // Slight vertical offset for each card
+      rotation: Math.random() * 4 - 2, // Slight rotation
+      zIndex: i,
+    }))
+  );
 
-  const SlideContainer = styled.div`
-    display: flex;
-    height: 100%;
-    align-items: center;
-    gap: 20px;
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: 10px;
+  const containerRef = useRef(null);
+  const dragState = useRef({ isDragging: false, cardId: null, offsetX: 0, offsetY: 0 });
+
+  const handleMouseDown = (e, cardId) => {
+    e.preventDefault();
+    const container = containerRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const card = cards.find(c => c.id === cardId);
+    
+    // Calculate card's actual center position in viewport coordinates
+    const cardCenterX = containerRect.left + containerRect.width / 2 + card.x;
+    const cardCenterY = containerRect.top + containerRect.height / 2 + card.y;
+
+    dragState.current = {
+      isDragging: true,
+      cardId,
+      offsetX: e.clientX - cardCenterX,
+      offsetY: e.clientY - cardCenterY,
+    };
+
+    // Bring card to front
+    setCards(prev =>
+      prev.map(c =>
+        c.id === cardId
+          ? { ...c, zIndex: Math.max(...prev.map(x => x.zIndex)) + 1 }
+          : c
+      )
+    );
+  };
+
+  const handleMouseMove = (e) => {
+    if (!dragState.current.isDragging || !containerRef.current) return;
+
+    const container = containerRef.current;
+    const rect = container.getBoundingClientRect();
+
+    // Calculate position relative to container center
+    const mouseXFromCenter = e.clientX - rect.left - rect.width / 2;
+    const mouseYFromCenter = e.clientY - rect.top - rect.height / 2;
+
+    setCards(prev =>
+      prev.map(c =>
+        c.id === dragState.current.cardId
+          ? {
+            ...c,
+            x: mouseXFromCenter - dragState.current.offsetX,
+            y: mouseYFromCenter - dragState.current.offsetY,
+            // Don't rotate while dragging - keep current rotation
+          }
+          : c
+      )
+    );
+  };
+
+  const handleMouseUp = () => {
+    if (dragState.current.isDragging && dragState.current.cardId !== null) {
+      // Apply random rotation only when released
+      setCards(prev =>
+        prev.map(c =>
+          c.id === dragState.current.cardId
+            ? { ...c, rotation: Math.random() * 8 - 4 }
+            : c
+        )
+      );
     }
-  `;
+    dragState.current.isDragging = false;
+  };
 
-  const ImageColumn = styled.div`
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  `;
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
 
-  const TextColumn = styled.div`
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  `;
-
-  const ViewButton = styled.button`
-    background: none;
-    border: none;
-    color: ${({ theme }) => theme.color};
-    font-size: 24px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: color 0.3s ease;
-    &:hover {
-      color: red;
-    }
-  `;
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
 
   return (
     <Section id="home">
-      <Splide
-        options={{
-          type: "loop",
-          perPage: 1,
-          perMove: 1,
-          autoplay: true,
-          interval: 5000,
-          pauseOnHover: true,
-          arrows: true,
-          pagination: true,
-          gap: "16px",
-          height: "30rem",
-          updateOnMove: true,
-          breakpoints: {
-            1024: {
-              perPage: 1,
-            },
-            768: {
-              perPage: 1,
-            },
-          },
-        }}
-        onMove={(splide) => {
-          // Move focus to the active slide
-          const activeSlide = splide.Components.Elements.slides[splide.index];
-          if (activeSlide) {
-            activeSlide.focus();
-          }
-        }}
-      >
-        {highlights.map((highlight, index) => (
-          <SplideSlide key={index}>
-            <SlideContainer>
-              <ImageColumn>
-                <img
-                  src={highlight.image}
-                  alt={highlight.text}
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    maxHeight: "100%",
-                    borderRadius: "10px",
-                    objectFit: "contain",
-                    cursor: "pointer",
+      <h1 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ cursor: 'pointer' }}>
+        Highlights
+      </h1>
+      {/* Desktop: Draggable Cards */}
+      <CoverflowContainer ref={containerRef}>
+        <CardStack>
+          {cards.map((card) => (
+            <DraggableCard
+              key={card.id}
+              style={{
+                left: `calc(50% + ${card.x}px)`,
+                top: `calc(50% + ${card.y}px)`,
+                transform: `translate(-50%, -50%) rotate(${card.rotation}deg)`,
+                zIndex: card.zIndex,
+              }}
+              onMouseDown={(e) => handleMouseDown(e, card.id)}
+            >
+              <img src={card.image} alt={card.text} />
+              <div className="card-overlay">
+                <p className="card-text">{card.text}</p>
+                <button
+                  className="card-button"
+                  onClick={() => {
+                    setExpandedProject(card.projectId);
+                    const projectsSection = document.getElementById("projects");
+                    if (projectsSection) {
+                      projectsSection.scrollIntoView({ behavior: "smooth" });
+                    }
                   }}
-                />
-              </ImageColumn>
-              <TextColumn>
-                <p>{highlight.text}</p>
-                <ViewButton onClick={() => { 
-                  setExpandedProject(highlight.projectId); 
-                  const projectsSection = document.getElementById("projects");
-                  if (projectsSection) {
-                    projectsSection.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}>→</ViewButton>
-              </TextColumn>
-            </SlideContainer>
-          </SplideSlide>
-        ))}
-      </Splide>
+                >
+                  →
+                </button>
+              </div>
+            </DraggableCard>
+          ))}
+        </CardStack>
+      </CoverflowContainer>
+
+      {/* Mobile: Simple Carousel */}
+      <MobileCarouselContainer>
+        <Slider {...{
+          dots: true,
+          infinite: true,
+          speed: 500,
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          autoplay: true,
+          autoplaySpeed: 5000,
+        }}>
+          {highlights.map((highlight, index) => (
+            <div key={index} style={{ position: 'relative', height: '400px' }}>
+              <img
+                src={highlight.image}
+                alt={highlight.text}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "10px",
+                }}
+              />
+            </div>
+          ))}
+        </Slider>
+      </MobileCarouselContainer>
     </Section>
   );
 }
@@ -853,6 +1141,7 @@ function Projects({ expandedProject, setExpandedProject }) {
   const [projectMedia, setProjectMedia] = useState({}); // Store media URLs for each project
   const [isFilterVisible, setIsFilterVisible] = useState(false); // Track filter visibility
   const [isVideoPlaying] = useState(false); // Track if a video is playing
+  const [previewState, setPreviewState] = useState({ isOpen: false, projectId: null, mediaIndex: 0 }); // Track preview modal state
 
   
 
@@ -1076,7 +1365,9 @@ function Projects({ expandedProject, setExpandedProject }) {
             height: "400px",
             borderRadius: "10px",
             objectFit: "contain",
+            cursor: "pointer",
           }}
+          onClick={() => setPreviewState({ isOpen: true, projectId: project.id, mediaIndex: index })}
         />
       </SplideSlide>
     );
@@ -1091,6 +1382,63 @@ function Projects({ expandedProject, setExpandedProject }) {
           )}
         </StyledCard>
       ))}
+
+      {/* Image Preview Modal (desktop only) */}
+      <ImagePreviewOverlay
+        isOpen={previewState.isOpen}
+        onClick={() => setPreviewState({ isOpen: false, projectId: null, mediaIndex: 0 })}
+      >
+        <PreviewCloseButton
+          onClick={() => setPreviewState({ isOpen: false, projectId: null, mediaIndex: 0 })}
+        >
+          ✕
+        </PreviewCloseButton>
+
+        {previewState.isOpen && projectMedia[previewState.projectId] && (
+          <ImagePreviewContent onClick={(e) => e.stopPropagation()}>
+            {projectMedia[previewState.projectId][previewState.mediaIndex].type === "image" && (
+              <>
+                <img
+                  src={
+                    projectMedia[previewState.projectId][previewState.mediaIndex].url.startsWith("http")
+                      ? projectMedia[previewState.projectId][previewState.mediaIndex].url
+                      : urlPrefix + projectMedia[previewState.projectId][previewState.mediaIndex].url
+                  }
+                  alt={"Preview " + (previewState.mediaIndex + 1)}
+                />
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                  <PreviewNavigationButton
+                    onClick={() => {
+                      setPreviewState((prev) => ({
+                        ...prev,
+                        mediaIndex: prev.mediaIndex === 0
+                          ? projectMedia[prev.projectId].length - 1
+                          : prev.mediaIndex - 1,
+                      }));
+                    }}
+                  >
+                    ←
+                  </PreviewNavigationButton>
+                  <PreviewCounter>
+                    {previewState.mediaIndex + 1} / {projectMedia[previewState.projectId].length}
+                  </PreviewCounter>
+                  <PreviewNavigationButton
+                    onClick={() => {
+                      setPreviewState((prev) => ({
+                        ...prev,
+                        mediaIndex: (prev.mediaIndex + 1) % projectMedia[prev.projectId].length,
+                      }));
+                    }}
+                  >
+                    →
+                  </PreviewNavigationButton>
+                </div>
+              </>
+            )}
+          </ImagePreviewContent>
+        )}
+      </ImagePreviewOverlay>
+
     </Section>
   );
 }
@@ -1100,6 +1448,7 @@ const AboutContainer = styled.div`
   grid-template-columns: 1fr 2fr;
   gap: 40px;
   align-items: start;
+  position: relative;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -1130,37 +1479,187 @@ const AboutRow = styled.div`
   }
 `;
 
+const AboutImagesContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 900px;
+  display: none;
+  overflow: visible;
+
+  @media (min-width: 769px) {
+    display: block;
+  }
+`;
+
+const MobileAboutImagesContainer = styled.div`
+  display: none;
+
+  @media (min-width: 769px) {
+    display: none;
+  }
+`;
+
+const DraggableAboutImage = styled.div`
+  position: absolute;
+  width: 300px;
+  height: 400px;
+  cursor: grab;
+  user-select: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: ${({ theme }) => theme.background === '#121212' 
+    ? '0 10px 30px rgba(255, 255, 255, 0.2)' 
+    : '0 10px 30px rgba(0, 0, 0, 0.3)'};
+  transition: box-shadow 0.2s ease;
+
+  &:active {
+    cursor: grabbing;
+    box-shadow: ${({ theme }) => theme.background === '#121212' 
+      ? '0 15px 40px rgba(255, 255, 255, 0.3)' 
+      : '0 15px 40px rgba(0, 0, 0, 0.5)'};
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 768px) {
+    position: static;
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+    cursor: default;
+  }
+`;
+
+const AboutContentContainer = styled.div`
+  grid-column: 2;
+  position: relative;
+
+  @media (max-width: 768px) {
+    grid-column: 1;
+  }
+`;
+
 
 
 
 function About() {
+  const images = [
+    { id: 0, src: "/aboutme/Dig.png", alt: "Digital Self", label: "DIGITAL SELF" },
+    { id: 1, src: "/aboutme/2025.JPG", alt: "Analog Self", label: "ANALOG SELF" },
+    
+  ];
+
+  const [aboutImages, setAboutImages] = useState(
+    images.map((img, i) => ({
+      ...img,
+      x: 0,
+      y: i * 420, // Stack vertically: 0, 420
+      zIndex: i,
+    }))
+  );
+
+  const containerRef = useRef(null);
+  const dragState = useRef({ isDragging: false, imageId: null, offsetX: 0, offsetY: 0 });
+
+  const handleMouseDown = (e, imageId) => {
+    e.preventDefault();
+    const container = containerRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const image = aboutImages.find(img => img.id === imageId);
+
+    dragState.current = {
+      isDragging: true,
+      imageId,
+      offsetX: e.clientX - (containerRect.left + image.x),
+      offsetY: e.clientY - (containerRect.top + image.y),
+    };
+
+    // Bring image to front
+    setAboutImages(prev =>
+      prev.map(img =>
+        img.id === imageId
+          ? { ...img, zIndex: Math.max(...prev.map(x => x.zIndex)) + 1 }
+          : img
+      )
+    );
+  };
+
+  const handleMouseMove = (e) => {
+    if (!dragState.current.isDragging || !containerRef.current) return;
+
+    const container = containerRef.current;
+    const rect = container.getBoundingClientRect();
+
+    setAboutImages(prev =>
+      prev.map(img =>
+        img.id === dragState.current.imageId
+          ? {
+            ...img,
+            x: e.clientX - rect.left - dragState.current.offsetX,
+            y: e.clientY - rect.top - dragState.current.offsetY,
+          }
+          : img
+      )
+    );
+  };
+
+  const handleMouseUp = () => {
+    dragState.current.isDragging = false;
+  };
+
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
   return (
     <Section id="about">
       <h1 onClick={() => document.getElementById("about").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>About me</h1>
+      {/* Desktop Layout */}
       <AboutContainer>
-    
-        <div>
-          <img
-            src={"/aboutme/2025.JPG"}
-            alt={`Me in 2025`}
-            style={{
-              width: "100%",
-              height: "auto",
-              borderRadius: "10px",
-              objectFit: "contain",
-            }}
-          />
-        </div>
+        {/* Desktop: Draggable Images */}
+        <AboutImagesContainer ref={containerRef}>
+          {aboutImages.map((img) => (
+            <DraggableAboutImage
+              key={img.id}
+              style={{
+                left: `${img.x}px`,
+                top: `${img.y}px`,
+                zIndex: img.zIndex,
+              }}
+              onMouseDown={(e) => handleMouseDown(e, img.id)}
+            >
+              <img src={img.src} alt={img.alt} />
+            </DraggableAboutImage>
+          ))}
+        </AboutImagesContainer>
+
+        {/* Mobile: Static Images */}
+        <MobileAboutImagesContainer>
+          {images.map((img) => (
+            <img
+              key={img.id}
+              src={img.src}
+              alt={img.alt}
+            />
+          ))}
+        </MobileAboutImagesContainer>
 
         {/* Right Column - Text */}
-        <div>
+        <AboutContentContainer>
           <AboutRow>
             <h2>MY DIGITAL SELF</h2>
             <p>
-              I am a creative technologist passionate about exploring innovative ways of interacting with digital and physical media.
-              With a technical background and creative inclinations, I thrive in maker spaces and have created a range of interactive
-              experiences for artistic and cultural applications. I am currently pursuing a PhD in Digital Design, driven by my endless
-              curiosity and passion for interaction.
+              I am a creative technologist and researcher passionate about making things you can touch, play with and get immersed in. With a technical background and creative and humanistic interests, I design and build interactive artifacts, to explore how can technology invite us to participate, create, play and pay attention to the world around us. I thrive in maker spaces where I can prototype ideas and test them in the real world. 
             </p>
           </AboutRow>
           <AboutRow>
@@ -1175,8 +1674,63 @@ function About() {
               would probably be one.
             </p>
           </AboutRow>
-        </div>
+        </AboutContentContainer>
       </AboutContainer>
+
+      {/* Mobile Layout */}
+      <div style={{ display: 'none' }} className="mobile-about-layout">
+        <div style={{ marginBottom: '30px' }}>
+          <h2 style={{ marginBottom: '15px', fontSize: '15px' }}>MY DIGITAL SELF</h2>
+          <img
+            src={images[0].src}
+            alt={images[0].alt}
+            style={{
+              width: "100%",
+              height: "auto",
+              borderRadius: "10px",
+              objectFit: "contain",
+              marginBottom: "20px",
+            }}
+          />
+          <p style={{ fontSize: '8px', marginTop: '5px', marginBottom: '30px' }}>
+            I am a creative technologist and researcher passionate about making things you can touch, play with and get immersed in. With a technical background and creative and humanistic interests, I design and build interactive artifacts, to explore how can technology invite us to participate, create, play and pay attention to the world around us. I thrive in maker spaces where I can prototype ideas and test them in the real world. 
+          </p>
+        </div>
+        <div>
+          <h2 style={{ marginBottom: '15px', fontSize: '15px' }}>MY ANALOG SELF</h2>
+          <img
+            src={images[1].src}
+            alt={images[1].alt}
+            style={{
+              width: "100%",
+              height: "auto",
+              borderRadius: "10px",
+              objectFit: "contain",
+              marginBottom: "20px",
+            }}
+          />
+          <p style={{ fontSize: '8px', marginTop: '5px', marginBottom: '30px' }}>
+            I was born and raised in Madrid, but I am currently based in Copenhagen. I have always been passionate about music, and
+            since I was 7, it has played a very important role in my life. Back then was when I started to play the drums. As part of
+            that journey, I have been working as a drum teacher for kids, playing semi-professionally in a few bands, composing and
+            recording an album, and playing it live in some venues and events. Nowadays, my music career is a bit calmer, but I still
+            play the drums and I am learning to play the bass. A recent hobby I've been enjoying lately is solving jigsaw puzzles. I
+            know, it doesn't sound as cool as being a rockstar but honestly, If there were such a thing as being a "puzzlestar", I
+            would probably be one.
+          </p>
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          #about > div[style*="display: block"] {
+            display: none !important;
+          }
+          .mobile-about-layout {
+            display: block !important;
+          }
+        }
+      `}</style>
     </Section>
   );
 }
@@ -1278,9 +1832,19 @@ function CV() {
     })
     : [];
 
+  const handleDownloadCV = () => {
+    const link = document.createElement('a');
+    link.href = '/CV_2026.pdf';
+    link.download = 'CV_2026.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <Section id="cv">
       <h1 onClick={() => document.getElementById("cv").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>CV</h1>
+      <DownloadButton onClick={handleDownloadCV}>Download CV</DownloadButton>
       {sections.length > 0 ? (
         <CVContainer>
           {sections.map((section, index) => (
