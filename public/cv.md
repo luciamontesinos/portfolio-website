@@ -22,6 +22,13 @@
 
 - BSc in Software Engineering, Universidad de Tecnología y Arte Digital, Madrid, Spain (2016 - 2020)
 
+# Skills
+- Interaction Design ☉ Concept development ☉ Digital prototyping ☉ Physical computing ☉ Sound-based Design ☉ AI Based Applications ☉ Speculative Design ☉ App Development ☉ User Research
+
+# Toolbox 
+- Max/MSP/Jitter ☉ Processing ☉ Python ☉ Arduino ☉ Figma ☉ Flutter ☉ js ☉ HTML/CSS  
+
+
 # Teaching
 - 2025, Guest lecture on *AI and Aesthetics* for the course *Designing Aestehtic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
 
@@ -44,7 +51,6 @@
 
 
 # Reviewing
-
 - Conferences: *DRS'25*, *CHI'25*, *DIS'25*, *NIME'25*, *Creativity and Cognition '24*.
 
 - Journals: *Digital Creativity*.

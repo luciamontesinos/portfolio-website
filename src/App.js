@@ -46,13 +46,16 @@ const GlobalStyle = createGlobalStyle`
     justify-content: center;
   }
   html {
-    scroll-behavior: smooth; /* Enables smooth scrolling */
+    scroll-behavior: smooth;  
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'TerminalGrotesque', sans-serif;
   }
+  h1 {
+    font-size: 40px;
+  }
   h2 {
-    font-size: 50px;
+    font-size: 40px;
   }
   p {
     font-size: 30px;
@@ -61,7 +64,7 @@ const GlobalStyle = createGlobalStyle`
    p1 {
     font-size: 25px;
     vertical-align: bottom;
-    display: inline-block; /* Ensure the element is inline-block */
+    display: inline-block; 
   height: 100%;
   }
 
@@ -73,6 +76,8 @@ const GlobalStyle = createGlobalStyle`
   a {
     color: ${({ theme }) => theme.color};
     text-decoration: none;
+    text-shadow: 1px 1px 10px red;
+
     transition: color 0.3s ease;
     &:hover {
       color: red;
@@ -103,6 +108,7 @@ const GlobalStyle = createGlobalStyle`
     }
     a {
       font-size: 17.5px; /* Adjust link font size */
+
     }
   }
 `;
@@ -113,6 +119,9 @@ const ContentWrapper = styled.div`
 `;
 
 const tags = [...new Set(projectList.flatMap(p => p.tags))];
+
+// For sorting by importance
+const importanceOrder = { high: 3, medium: 2, low: 1 };
 
 const Navbar = styled.div`
   position: fixed;
@@ -182,7 +191,7 @@ const NameContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start; /* Align content to the top */
+  justify-content: flex-start; 
 
 `;
 
@@ -231,38 +240,11 @@ const FilterContainer = styled.div`
   margin-bottom: 16px;
 
   @media (min-width: 768px) {
-    display: flex; /* Always visible on larger screens */
+    display: flex; 
   }
 `;
 
-const FilterToggleButton = styled.button`
-  display: none;
-  padding: 8px 16px;
-  font-size: 14px;
- color: ${({ isSelected, theme }) => (isSelected ? "red" : theme.color)};
-  background: transparent;
-  border: 1px solid ${({ isSelected, theme }) => (isSelected ? "red" : theme.color)};
-  border-radius: 24px;
-  cursor: pointer;
-  margin-bottom: 8px;
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-  &:hover {
-    background: transparent;
-    //color: red;
-    border-color: red;
-  }
 
-  span {
-    font-style: 'StandardBookItalic', sans-serif;
-    font-size: 12px; 
-    margin-left: 8px; 
-    color: gray;
-  }
-
-  @media (max-width: 768px) {
-    display: block; /* Show the button only on small screens */
-  }
-`;
 
 const StyledFilterButton = styled.button`
   padding: 8px 16px;
@@ -287,19 +269,56 @@ const StyledFilterButton = styled.button`
   }
 `;
 
-// const StyledButton = styled.button`
-//   padding: 8px 12px;
-//   margin-right: 5px;
-//   border: none;
-//   border-radius: 5px;
-//   background: green;
-//   color: white;
-//   cursor: pointer;
-//   transition: background 0.3s ease;
-//   &:hover {
-//     background: darkgreen;
-//   }
-// `;
+const SortFunnelButton = styled.button`
+  padding: 8px 12px;
+  font-size: 18px;
+  color: ${({ theme }) => theme.color};
+  background: transparent;
+  border: 1.5px solid ${({ theme }) => theme.color};
+  border-radius: 40%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+  &:hover {
+    color: red;
+    border-color: red;
+    background: rgba(255, 0, 0, 0.07);
+  }
+`;
+
+const SortDropdown = styled.div`
+  position: absolute;
+  top: 110%;
+  left: 0;
+  background: ${({ theme }) => theme.background};
+  border: 1px solid ${({ theme }) => theme.color};
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 2000;
+  min-width: 200px;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+`;
+
+const SortDropdownOption = styled.button`
+  background: none;
+  border: none;
+  color: ${({ selected, theme }) => (selected ? 'red' : theme.color)};
+  font-size: 16px;
+  text-align: left;
+  padding: 12px 18px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s ease, color 0.2s ease;
+  &:hover {
+    background: rgba(255, 0, 0, 0.07);
+    color: red;
+  }
+`;
 
 const StyledCard = styled.div`
   display: flex;
@@ -343,51 +362,14 @@ const TagContainer = styled.div`
   justify-content: flex-end;
 
   button {
-    font-size: 10px; /* Make the tags smaller */
-    padding: 4px 8px; /* Adjust padding for smaller size */
+    font-size: 10px; 
+    padding: 4px 8px; 
   }
 
   @media (max-width: 768px) {
-    display: none; /* Hide the filters on small screens */
+    display: none; 
   }
 `;
-
-// const TagContainerRow = styled.div`
-//   display: flex;
-//   flex-wrap: wrap; /* Allow tags to wrap if they exceed the width */
-//   gap: 8px; /* Space between tags */
-//   width: 100%; /* Make it span the full width of the parent */
-//   margin-top: 8px;
-//   justify-content: flex-start; /* Align tags to the left */
-//   align-items: center;
-// `;
-
-
-
-// const DropdownContent = styled.div`
-//   margin-top: 16px;
-//   padding: 16px;
-//   color: white;
-//   font-size: 14px;
-// `;
-
-// const ArrowButton = styled.button`
-//   background: transparent;
-//   border: none;
-//   color: white;
-//   font-size: 40px;
-//   cursor: pointer;
-//   margin-right: 8px;
-//   &:hover {
-//     color: red;
-//   }
-
-//    @media (max-width: 768px) {
-//     font-size: 28px; 
-//     margin-right: 4px;
-//   }
-
-// `;
 
 const ListRow = styled.div`
   display: flex;
@@ -426,24 +408,19 @@ const ListRow = styled.div`
 
 const DropdownRow = styled.div`
   display: flex;
-  flex-direction: column; /* Stack items vertically */
+  flex-direction: column;
   padding: 16px;
-  width: 100%; /* Ensure it spans the full width */
-  box-sizing: border-box; /* Include padding in the width */
+  width: 100%; 
+  box-sizing: border-box; 
 `;
 
-// const ArrowColumn = styled.div`
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-// `;
 
 const DetailsColumn = styled.div`
   color: ${({ theme }) => theme.color};
   font-size: 14px;
  
-  grid-template-columns: 4fr 8fr; /* Two columns: one for h2 and one for p */
-  gap: 16px; /* Space between columns */
+  grid-template-columns: 4fr 8fr; 
+  gap: 16px; 
   text-align: justify;
   color: ${({ theme }) => theme.color};
   max-width: 100%;
@@ -452,17 +429,17 @@ const DetailsColumn = styled.div`
 
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr; /* Stack columns vertically on smaller screens */
+    grid-template-columns: 1fr; 
   }
 
   h2 {
-    font-size: 35px; /* Match the About section's h2 font size */
-    margin: 0; /* Remove default margin */
+    font-size: 35px; 
+    margin: 0; 
   }
 
   p {
-    font-size: 21px; /* Match the About section's p font size */
-    margin: 0; /* Remove default margin */
+    font-size: 21px; 
+    margin: 0; 
   }
 `;
 
@@ -488,15 +465,15 @@ const MediaContainer = styled.div`
 `;
 
 const SocialLinkRow = styled.div`
-  display: flex; /* Use flexbox to align items in a row */
-  align-items: center; /* Vertically align items */
-  gap: 8px; /* Add spacing between items */
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
   font-size: 18px;
 
   p {
-    margin: 0px; /* Remove default margin */
+    margin: 0px; 
     font-size: 18px;
-    color: gray; /* Optional: Different color for the descriptor */
+    color: gray; 
   }
 
   a {
@@ -520,77 +497,44 @@ const SocialLink = styled.a`
 
 const CityRow = styled.div`
   position: relative;
-  display: inline-block; /* Ensure proper positioning for hover info */
+  display: inline-block; 
   cursor: pointer;
 `;
 
 const HoverInfo = styled.div`
   position: absolute;
-  top: -20px; /* Position above the city name */
+  top: -20px; 
   left: 0;
-  background: transparent; /* Transparent background */
-  color: ${({ theme }) => theme.color}; /* White text for the organization */
+  background: transparent; 
+  color: ${({ theme }) => theme.color}; 
   font-size: 14px;
   white-space: nowrap;
   z-index: 10;
 `;
 
-// const TimeBox = styled.div`
-//   width: 40px; /* Fixed width for each box */
-//   height: 50px; /* Fixed height for each box */
-//   background: #000; /* Black background for retro look */
-//   color: #00ff00; /* Green text for retro digital clock style */
-//   font-family: 'TerminalGrotesque', monospace; /* Use the existing retro font */
-//   font-size: 24px; /* Adjust font size for the clock */
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   text-align: center;
-//   border-radius: 4px;
-//   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-
-//   /* Create the split effect for the flip clock */
-//   &::before,
-//   &::after {
-//     content: "";
-//     position: absolute;
-//     left: 0;
-//     width: 100%;
-//     height: 50%;
-//     background: #000;
-//     z-index: -1;
-//   }
-
-//   &::before {
-//     top: 0;
-//     border-bottom: 2px solid #333; /* Line separating the top and bottom sections */
-//   }
-
-//   &::after {
-//     bottom: 0;
-//     border-top: 2px solid #333; /* Line separating the top and bottom sections */
-//   }
-// `;
 
 const CVContainer = styled.div`
   display: grid;
   gap: 16px; /* Space between rows */
+  p1 {
+  color: ${({ theme }) => theme.color}; 
+  font-size: 35px;}
 `;
 
 const CVRow = styled.div`
   display: grid;
-  grid-template-columns: 4fr 8fr; /* Two columns: title and content */
-  gap: 16px; /* Space between columns */
-  align-items: start; /* Align items at the top of the row */
+  grid-template-columns: 4fr 8fr; 
+  gap: 16px; 
+  align-items: start; 
   text-align: justify;
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr; /* Stack columns vertically on smaller screens */
+    grid-template-columns: 1fr; 
   }
 
   h2 {
     
-    margin: 0; /* Remove default margin */
+    margin: 0; 
   }
 
   div {
@@ -600,29 +544,29 @@ const CVRow = styled.div`
 }
     p {
       font-size: 20px;
-      margin-bottom: 16px; /* Add space between paragraphs */
+      margin-bottom: 16px; 
     }
 
     ul {
       font-size: 20px;
-      margin: 16px 0; /* Add space above and below lists */
-      padding-left: 20px; /* Indent list items */
+      margin: 16px 0; 
+      padding-left: 20px; 
     }
 
     li {
       font-size: 20px;
-      margin-bottom: 8px; /* Add space between list items */
-      list-style: none; /* Remove default bullet */
+      margin-bottom: 8px; 
+      list-style: none; 
       position: relative;
     }
 
     li::before {
-      content: "→"; /* Replace with your desired symbol */
+      content: "→"; 
       position: absolute;
-      left: -40px; /* Adjust position */
+      left: -40px; 
       top: -12px;
-      color: red; /* Customize color */
-      font-size: 40px; /* Match font size */
+      color: red; 
+      font-size: 40px; 
     }
   
 `;
@@ -659,39 +603,39 @@ const PublicationsList = styled.div`
 }
     p {
       font-size: 20px;
-      margin-bottom: 16px; /* Add space between paragraphs */
+      margin-bottom: 16px; 
     }
 
     ul {
       font-size: 20px;
-      margin: 16px 0; /* Add space above and below lists */
-      padding-left: 20px; /* Indent list items */
+      margin: 16px 0; 
+      padding-left: 20px; 
     }
 
     li {
       font-size: 20px;
-      margin-bottom: 8px; /* Add space between list items */
-      list-style: none; /* Remove default bullet */
+      margin-bottom: 8px;
+      list-style: none;
       position: relative;
     }
 
     li::before {
-      content: "→"; /* Replace with your desired symbol */
+      content: "→"; 
       position: absolute;
-      left: -40px; /* Adjust position */
+      left: -40px; 
       top: -12px;
-      color: red; /* Customize color */
-      font-size: 40px; /* Match font size */
+      color: red; 
+      font-size: 40px; 
     }
   
 `;
 
 const SplideWrapper = styled.div`
-  width: 100%; /* Full width of the parent */
-  max-width: 100%; /* Prevent it from exceeding the parent's width */
-  overflow: hidden; /* Prevent content overflow */
+  width: 100%; 
+  max-width: 100%; 
+  overflow: hidden; 
  
-  box-sizing: border-box; /* Include padding and border in the width */
+  box-sizing: border-box; 
 
 `;
 
@@ -844,16 +788,16 @@ const DraggableCard = styled.div`
   overflow: hidden;
   cursor: grab;
   user-select: none;
-  box-shadow: ${({ theme }) => theme.background === '#121212' 
-    ? '0 10px 30px rgba(255, 255, 255, 0.2)' 
-    : '0 10px 30px rgba(0, 0, 0, 0.3)'};
+  box-shadow: ${({ theme }) => theme.background === '#121212'
+    ? '0 10px 30px rgba(255, 255, 255, 0.06)'
+    : '0 10px 30px rgba(0, 0, 0, 0.12)'};
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 
   &:active {
     cursor: grabbing;
-    box-shadow: ${({ theme }) => theme.background === '#121212' 
-      ? '0 15px 40px rgba(255, 255, 255, 0.3)' 
-      : '0 15px 40px rgba(0, 0, 0, 0.5)'};
+    box-shadow: ${({ theme }) => theme.background === '#121212'
+      ? '0 18px 50px rgba(255, 255, 255, 0.06)'
+      : '0 18px 50px rgba(0, 0, 0, 0.2)'};
   }
 
   img {
@@ -867,17 +811,25 @@ const DraggableCard = styled.div`
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    background-color: rgba(0,0,0,0.35);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
     color: white;
-    padding: 20px;
+    padding: 16px 18px;
     border-radius: 0 0 12px 12px;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
   }
 
   .card-text {
-    margin: 0 0 10px 0;
+    margin: 0;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
+    flex: 1 1 auto;
+    text-align: left;
   }
 
   .card-button {
@@ -906,6 +858,32 @@ const DraggableCard = styled.div`
     }
   }
 `;
+
+const DragHint = styled.div`
+  position: absolute;
+  font-family: 'TerminalGrotesque', sans-serif;
+  bottom: 10
+  px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: red;
+  text-shadow: 1px 1px 10px red;
+  padding: 8px 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  z-index: 3000;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+
 
 function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -946,7 +924,7 @@ function Navigation() {
     <Navbar style={{ transform: isVisible ? "translateY(0)" : "translateY(-110%)", transition: "transform 0.3s ease-in-out" }}>
       <NameContainer>
         <h1>Lucía Montesinos</h1>
-        <h3>PhD Fellow | Creative Technologist</h3>
+        <h3>Creative Technologist | PhD Fellow</h3>
       </NameContainer>
      
       <BurgerMenu onClick={toggleMenu} isMenuOpen={isMenuOpen}>
@@ -955,10 +933,10 @@ function Navigation() {
         <div />
       </BurgerMenu>
       <NavLinks isMenuOpen={isMenuOpen}>
-        {/* <a href="#home" onClick={closeMenu}>Home</a> */}
+        <a href="#home" onClick={closeMenu}>Home</a>
         <a href="#about" onClick={closeMenu}>About Me</a>
-        <a href="#publications" onClick={closeMenu}>Publications</a>
         <a href="#projects" onClick={closeMenu}>Projects</a>
+        <a href="#publications" onClick={closeMenu}>Publications</a>
         <a href="#cv" onClick={closeMenu}>CV</a>
         <a href="#contact" onClick={closeMenu}>Contact</a>
       </NavLinks>
@@ -971,7 +949,7 @@ function Home({ setExpandedProject }) {
 
     { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/ericophone1.jpg", text: "Conversational User Interface", projectId: 1 },
     { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/kinetip.png", text: "Interactive Virtual Game based on Gesture and Handwriting Recognition", projectId: 3 },
-        { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/tubularium1.png", text: "Tubularium - Musicking Artifact I", projectId: 9 },
+    { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/tubularium1.png", text: "Tubularium - Musicking Artifact I", projectId: 9 },
     { image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/picnic4.png", text: "Picnic - Musicking Artifact II", projectId: 10 },
   ];
 
@@ -988,6 +966,7 @@ function Home({ setExpandedProject }) {
 
   const containerRef = useRef(null);
   const dragState = useRef({ isDragging: false, cardId: null, offsetX: 0, offsetY: 0 });
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseDown = (e, cardId) => {
     e.preventDefault();
@@ -1067,10 +1046,17 @@ function Home({ setExpandedProject }) {
   return (
     <Section id="home">
       <h1 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ cursor: 'pointer' }}>
-        Highlights
+        HIGHLIGHTS
       </h1>
       {/* Desktop: Draggable Cards */}
-      <CoverflowContainer ref={containerRef}>
+      <CoverflowContainer
+        ref={containerRef}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {isHovered && !dragState.current.isDragging && (
+          <DragHint> (DRAG TO REVEAL)</DragHint>
+        )}
         <CardStack>
           {cards.map((card) => (
             <DraggableCard
@@ -1085,7 +1071,19 @@ function Home({ setExpandedProject }) {
             >
               <img src={card.image} alt={card.text} />
               <div className="card-overlay">
-                <p className="card-text">{card.text}</p>
+                <p
+                  className="card-text"
+                  style={{ cursor: 'pointer',  }}
+                  onClick={() => {
+                    setExpandedProject(card.projectId);
+                    const projectsSection = document.getElementById("projects");
+                    if (projectsSection) {
+                      projectsSection.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                >
+                  {card.text}
+                </p>
                 <button
                   className="card-button"
                   onClick={() => {
@@ -1139,9 +1137,11 @@ function Projects({ expandedProject, setExpandedProject }) {
   const [selectedTags, setSelectedTags] = useState([]);
   const [projectContent, setProjectContent] = useState({}); // Store content of each project
   const [projectMedia, setProjectMedia] = useState({}); // Store media URLs for each project
-  const [isFilterVisible, setIsFilterVisible] = useState(false); // Track filter visibility
+  const [isFilterVisible] = useState(false); // Track filter visibility
   const [isVideoPlaying] = useState(false); // Track if a video is playing
   const [previewState, setPreviewState] = useState({ isOpen: false, projectId: null, mediaIndex: 0 }); // Track preview modal state
+  const [sortMode, setSortMode] = useState("importance"); // 'recent' or 'importance', default to importance
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
 
   
 
@@ -1163,6 +1163,7 @@ function Projects({ expandedProject, setExpandedProject }) {
   "/images/livevisuals.mov": "https://www.youtube.com/embed/dIBtaVdXCPE",
   "/images/recommender.mp4": "https://www.youtube.com/embed/Gi7HCa44ZLw",
   "/images/picnic.mp4": "https://www.youtube.com/embed/vzOZoCOCKr0?si=ia0198lEJOoc9JzN",
+  "/images/kinetip.mp4": "https://www.youtube.com/embed/IDFvhmlaa_E",
 };
             let mediaUrls = [];
             if (mediaSection) {
@@ -1199,11 +1200,20 @@ function Projects({ expandedProject, setExpandedProject }) {
     return acc;
   }, {});
 
-  const filteredProjects = selectedTags.length > 0
-  ? projectList
-      .filter((p) => selectedTags.every(tag => p.tags.includes(tag)))
-      .sort((a, b) => b.year - a.year)
-  : projectList.sort((a, b) => b.year - a.year); // Sort by year descending
+  let filteredProjects = selectedTags.length > 0
+    ? projectList.filter((p) => selectedTags.every(tag => p.tags.includes(tag)))
+    : [...projectList];
+
+  if (sortMode === "recent") {
+    filteredProjects = filteredProjects.sort((a, b) => b.year - a.year);
+  } else if (sortMode === "importance") {
+    filteredProjects = filteredProjects.sort((a, b) => {
+      const impA = importanceOrder[a.importance] || 0;
+      const impB = importanceOrder[b.importance] || 0;
+      if (impB !== impA) return impB - impA;
+      return b.year - a.year;
+    });
+  }
 
   const toggleExpand = (projectId) => {
     if (expandedProject === projectId) {
@@ -1225,11 +1235,34 @@ function Projects({ expandedProject, setExpandedProject }) {
 
   return (
     <Section id="projects">
-      <h1 onClick={() => document.getElementById("projects").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>Projects</h1>
-      <FilterToggleButton onClick={() => setIsFilterVisible((prev) => !prev)}>
-        {isFilterVisible ? "Hide Filters" : "Filter"}
-      </FilterToggleButton>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+        <h1 onClick={() => document.getElementById("projects").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer', margin: 0 }}>PROJECTS</h1>
+      </div>
       <FilterContainer isVisible={isFilterVisible}>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <SortFunnelButton
+            onClick={() => setShowSortDropdown((prev) => !prev)}
+            aria-label="Sort options"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 4 21 4 14 14 14 20 10 20 10 14 3 4"></polygon></svg>
+          </SortFunnelButton>
+          {showSortDropdown && (
+            <SortDropdown>
+              <SortDropdownOption
+                selected={sortMode === "importance"}
+                onClick={() => { setSortMode("importance"); setShowSortDropdown(false); }}
+              >
+                Most important first
+              </SortDropdownOption>
+              <SortDropdownOption
+                selected={sortMode === "recent"}
+                onClick={() => { setSortMode("recent"); setShowSortDropdown(false); }}
+              >
+                More recent first
+              </SortDropdownOption>
+            </SortDropdown>
+          )}
+        </div>
         {[...tags].sort((a, b) => {
       const aNum = !isNaN(Number(a));
       const bNum = !isNaN(Number(b));
@@ -1263,77 +1296,84 @@ function Projects({ expandedProject, setExpandedProject }) {
           See all <span>{projectList.length}</span>
         </StyledFilterButton>
       </FilterContainer>
-      {filteredProjects.map((project) => (
-        <StyledCard key={project.id}>
-          <ListRow
-            onClick={() => toggleExpand(project.id)}
-            isexpanded={expandedProject === project.id}
-          >
-            <p>{project.name}</p>
-            {expandedProject !== project.id && (
-              <p1>{project.description}</p1>
-            )}
+      {filteredProjects.length === 0 ? (
+        <div style={{ color: 'red', fontSize: '22px', margin: '32px 0', textAlign: 'center' }}>
+          No projects found for the selected tag combination.
+        </div>
+      ) : (
+        filteredProjects.map((project) => (
+          <StyledCard key={project.id}>
+            <ListRow
+              onClick={() => toggleExpand(project.id)}
+              isexpanded={expandedProject === project.id}
+            >
+              <p>{project.name}</p>
+              {expandedProject !== project.id && (
+                <p1>{project.description}</p1>
+              )}
 
-            <TagContainer>
+              <TagContainer>
 
-              {[...project.tags].sort().map((tag) => (
-                <StyledFilterButton
-                  key={tag}
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering the dropdown toggle
-                    setSelectedTags(tag);
-                  }}
-                >
-                  {tag}
-                </StyledFilterButton>
-              ))}
-            </TagContainer>
+                {[...project.tags].sort().map((tag) => (
+                  <StyledFilterButton
+                    key={tag}
+                    isSelected={selectedTags.includes(tag)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent triggering the dropdown toggle
+                      setSelectedTags((prev) =>
+                        prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+                      );
+                    }}
+                  >
+                    {tag}
+                  </StyledFilterButton>
+                ))}
+              </TagContainer>
 
-          </ListRow>
-          {expandedProject === project.id && (
-            <DropdownRow>
-              <p>{project.description}</p>
-              <DetailsColumn>
-                <ReactMarkdown>{projectContent[project.id]}</ReactMarkdown>
-                <h2>Media</h2>
-                <MediaContainer>
-                  {projectMedia[project.id] && projectMedia[project.id].length > 0 && (
-                    <SplideWrapper>
-                    <Splide
-                      style={{
-                        width: "100%", // Ensure it spans the full width of the parent
-                        maxWidth: "100%",
-                        overflow: "hidden", // Prevent content overflow
-                        margin: "0 auto",
-                      }}
-                      options={{
-                        type: "slide",
-                        perPage: 3,
-                        perMove: 1,
-                        autoplay: !isVideoPlaying,
-                        interval: 3000,
-                        pauseOnHover: true,
-                        focus: "center",
-                        gap: "16px",
-                        autoWidth: true,
-                        height: "25rem",
-                        breakpoints: {
-                          1024: {
-                            perPage: 2,
+            </ListRow>
+            {expandedProject === project.id && (
+              <DropdownRow>
+                <p>{project.description}</p>
+                <DetailsColumn>
+                  <ReactMarkdown>{projectContent[project.id]}</ReactMarkdown>
+                  <MediaContainer>
+                    {projectMedia[project.id] && projectMedia[project.id].length > 0 && (
+                      <SplideWrapper>
+                      <Splide
+                        style={{
+                          width: "100%", // Ensure it spans the full width of the parent
+                          maxWidth: "100%",
+                          overflow: "hidden", // Prevent content overflow
+                          margin: "0 auto",
+                        }}
+                        options={{
+                          type: "slide",
+                          perPage: 3,
+                          perMove: 1,
+                          autoplay: !isVideoPlaying,
+                          interval: 3000,
+                          pauseOnHover: true,
+                          focus: "center",
+                          gap: "16px",
+                          autoWidth: true,
+                          height: "25rem",
+                          breakpoints: {
+                            1024: {
+                              perPage: 2,
+                            },
+                            600: {
+                              perPage: 1,
+                            },
                           },
-                          600: {
-                            perPage: 1,
-                          },
-                        },
-                      }}
-                      onMove={(splide) => {
-                        const activeSlide = splide.Components.Elements.slides[splide.index];
-                        if (activeSlide) {
-                          activeSlide.focus();
-                        }
-                      }}
-                    >
-                      {projectMedia[project.id].map((media, index) => {
+                        }}
+                        onMove={(splide) => {
+                          const activeSlide = splide.Components.Elements.slides[splide.index];
+                          if (activeSlide) {
+                            activeSlide.focus();
+                          }
+                        }}
+                      >
+                        {projectMedia[project.id].map((media, index) => {
   if (media.type === "video") {
     // media.url is a YouTube URL from youtubeVideoMap
     return (
@@ -1373,15 +1413,16 @@ function Projects({ expandedProject, setExpandedProject }) {
     );
   }
 })}
-                    </Splide>
-                    </SplideWrapper>
-                  )}
-                </MediaContainer>
-              </DetailsColumn>
-            </DropdownRow>
-          )}
-        </StyledCard>
-      ))}
+                      </Splide>
+                      </SplideWrapper>
+                    )}
+                  </MediaContainer>
+                </DetailsColumn>
+              </DropdownRow>
+            )}
+          </StyledCard>
+        ))
+      )}
 
       {/* Image Preview Modal (desktop only) */}
       <ImagePreviewOverlay
@@ -1548,8 +1589,8 @@ const AboutContentContainer = styled.div`
 
 function About() {
   const images = [
-    { id: 0, src: "/aboutme/Dig.png", alt: "Digital Self", label: "DIGITAL SELF" },
-    { id: 1, src: "/aboutme/2025.JPG", alt: "Analog Self", label: "ANALOG SELF" },
+    { id: 0, src: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/Dig.png", alt: "Digital Self", label: "DIGITAL SELF" },
+    { id: 1, src: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/me.JPG", alt: "Analog Self", label: "ANALOG SELF" },
     
   ];
 
@@ -1623,7 +1664,7 @@ function About() {
 
   return (
     <Section id="about">
-      <h1 onClick={() => document.getElementById("about").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>About me</h1>
+      <h1 onClick={() => document.getElementById("about").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>ABOUT ME</h1>
       {/* Desktop Layout */}
       <AboutContainer>
         {/* Desktop: Draggable Images */}
@@ -1657,13 +1698,13 @@ function About() {
         {/* Right Column - Text */}
         <AboutContentContainer>
           <AboutRow>
-            <h2>MY DIGITAL SELF</h2>
+            <h2>My digital self</h2>
             <p>
               I am a creative technologist and researcher passionate about making things you can touch, play with and get immersed in. With a technical background and creative and humanistic interests, I design and build interactive artifacts, to explore how can technology invite us to participate, create, play and pay attention to the world around us. I thrive in maker spaces where I can prototype ideas and test them in the real world. 
             </p>
           </AboutRow>
           <AboutRow>
-            <h2>MY ANALOG SELF</h2>
+            <h2>My analog self</h2>
             <p>
               I was born and raised in Madrid, but I am currently based in Copenhagen. I have always been passionate about music, and
               since I was 7, it has played a very important role in my life. Back then was when I started to play the drums. As part of
@@ -1737,30 +1778,16 @@ function About() {
 
 function Contact() {
   const theme = useTheme();
-  const [hoveredCity, setHoveredCity] = useState(null); // Track the hovered city
-
-  const currentCity = citiesList.find((city) => city.isHome); // Find the current city
-  const previousCities = citiesList.filter((city) => !city.isHome); // Find previous cities
+  const [hoveredCity, setHoveredCity] = useState(null); 
+  const currentCity = citiesList.find((city) => city.isHome); 
+  const previousCities = citiesList.filter((city) => !city.isHome);
 
   return (
     <Section id="contact">
-      <h1 onClick={() => document.getElementById("contact").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>Contact</h1>
+      <h1 onClick={() => document.getElementById("contact").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>CONTACT</h1>
 
       <div>
-        <p> Get in touch </p>
-        <SocialLinksContainer>
-          {socialLinks.map((link) => (
-            <SocialLinkRow key={link.label}>
-              <p>{link.descriptor}:</p> {/* Descriptor */}
-              <SocialLink href={link.href} target="_blank" rel="noopener noreferrer">
-                {link.label} {/* Link label */}
-              </SocialLink>
-            </SocialLinkRow>
-          ))}
-        </SocialLinksContainer>
-
-        <p>
-          Currently based in {" "}
+        <p1> Get in touch. Currently based in {" "}
           <CityRow
             onMouseEnter={() => setHoveredCity(currentCity)}
             onMouseLeave={() => setHoveredCity(null)}
@@ -1786,15 +1813,23 @@ function Contact() {
                 }}
               >
                 {city.city}
-                {index < previousCities.length - 1 ? "," : ""}
+                {index < previousCities.length - 1 ? "," : "."}
               </span>
               {hoveredCity === city && <HoverInfo>{city.organization}</HoverInfo>}
             </CityRow>
-          ))}.</p>
-      </div>
-      <div>
-
-
+          ))}</p1>
+            </div>
+              <div>
+        <SocialLinksContainer>
+          {socialLinks.map((link) => (
+            <SocialLinkRow key={link.label}>
+              <p>{link.descriptor}:</p> {}
+              <SocialLink href={link.href} target="_blank" rel="noopener noreferrer">
+                {link.label} {}
+              </SocialLink>
+            </SocialLinkRow>
+          ))}
+        </SocialLinksContainer>
       </div>
     </Section>
   );
@@ -1849,7 +1884,7 @@ function CV() {
         <CVContainer>
           {sections.map((section, index) => (
             <CVRow key={index}>
-              <h2>{section.title}</h2>
+              <p1>{section.title}</p1>
               <ReactMarkdown>{section.content}</ReactMarkdown>
             </CVRow>
           ))}
@@ -1934,9 +1969,9 @@ function Publications() {
 
   return (
     <Section id="publications">
-      <h1>Publications</h1>
+      <h1>PUBLICATIONS</h1>
       {loading ? (
-        <p>Loading...</p>
+        <p>Finding the latest publications...</p>
       ) : publications.length > 0 ? (
 
         <PublicationsList>
@@ -2057,8 +2092,8 @@ function App() {
         <SectionsContainer>
           <Home setExpandedProject={setExpandedProject} /> 
           <About />
-          <Publications />
           <Projects expandedProject={expandedProject} setExpandedProject={setExpandedProject} />
+          <Publications />
           <CV />
           <Contact />
         </SectionsContainer>
