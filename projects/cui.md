@@ -1,6 +1,6 @@
 In the summer of 2023, I was part of [Schibsted’s](https://schibsted.com/) Futures Lab in Oslo. The lab's goal is to explore, through hands-on experimentation, how emerging technologies will shape the future, particularly within Schibsted's markets of media and marketplaces. During my time there, we explored how Conversational User Interface could look like. 
 
-For context, OpenAI had already released Whisper, and there were already some text-based interfaces, like [Pi] (https://pi.ai/) which offered to read the responses aloud, with different voices to choose from. As these chatbots were getting more popular, we saw it as the perfect opportunity to explore how Conversational User Interfaces could look like in practice.
+For context, OpenAI had already released Whisper, and there were already some text-based interfaces, like [Pi](https://pi.ai/) which offered to read the responses aloud, with different voices to choose from. As these chatbots were getting more popular, we saw it as the perfect opportunity to explore how Conversational User Interfaces could look like in practice.
 
 
 We started by looking at our own office dynamics. When working on a project, there are countless iterations: some days you move forward, other days you branch out and explore. By the time the weekly status meeting rolls around, so much gets left unsaid because documenting every little detail feels overwhelming. But what if you could just talk about your day the way you would with friends and family?

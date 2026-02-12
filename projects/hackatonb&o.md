@@ -6,8 +6,7 @@ Let's say you are hosting an event, either a hackaton or a dinner party. You wan
 
 What we proposed in our solution is to leverage the existing software and hardware that B&O has and create a feature that would help you run events smoothly. We called it "Space Flow". In the images you can see some wireframes we quickly mocked up based on their current app. On top of their app, we added a feature that allows you to create an event around the different spaces in the hosting venue and configure it around the events agenda, which you can synchronise with your calendar.
 
-Moreover, we incorporated actions, which are sound events that trigger changes in the playback of the sound. This works using an audio feature classifier. With this, we are able to detect when someone is giving a speech, by simply recognising when someone clicks on a glass multiple times; and when the speech is over as we recognise the applause. By detecting these events, we can 
- stop the music when the speech is about to begin and then bring the sound back once the speech is over. Simple, but effective.
+Moreover, we incorporated actions, which are sound events that trigger changes in the playback of the sound. This works using an audio feature classifier. With this, we are able to detect when someone is giving a speech, by simply recognising when someone clicks on a glass multiple times; and when the speech is over as we recognise the applause. By detecting these events, we can automatically stop the music when the speech is about to begin and then bring the sound back once the speech is over. Simple, but effective.
 
 I really enjoyed being part of this event. Not only was it an interesting challenge, but it brought together young women working in different STEM fields, creating a valuable opportunity to network.
 
@@ -20,6 +19,3 @@ In this project, I was in charge of the wireframes, done in [Figma](https://www.
 ![Wireframes 1](/images/hackaton2.png)
 ![Wireframes 2](/images/hackaton3.png)
 ![Screenshot of the audio classifier](/images/hackaton4.png)
-
-
-

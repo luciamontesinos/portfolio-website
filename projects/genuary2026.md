@@ -2,8 +2,6 @@ During January of 2026 I started the [Genuary Challenge](https://genuary.art/), 
 
 Everything was done using p5.js, and I was particularly focused on having motion in the designs. Below, I explain and show what was behind the ideas, but if you just want to see it, go to [@luciam0ntesin0s on Instagram](https://www.instagram.com/luciam0ntesin0s)
 
-And yes, I say tried, because I didn't finish it. 
-
 
 Here is some more info about what I did:
 
