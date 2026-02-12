@@ -989,132 +989,168 @@ function LogoAnimationOverlay({ onComplete }) {
   const animationRef = useRef(null);
   const [isComplete, setIsComplete] = useState(false);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+useEffect(() => {
+  const canvas = canvasRef.current;
+  if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    const width = canvas.width;
-    const height = canvas.height;
+  const ctx = canvas.getContext("2d");
 
-    const state = {
-      t: 0,
-      speed: 0.01,
-      mainIsDone: false,
-      posX: width / 2,
-      posY: height / 2,
-      myScale: 1.5,
-      zoomingIn: true,
-      scaleT: 0,
-      scaleSpeed: 0.01,
-      baseScale: 1.5,
-      zoomScale: 2.0
-    };
+  const width = canvas.width;
+  const height = canvas.height;
 
-    const startMain = [
-      [30, 40, 30, 80],
-      [30, 80, 60, 80],
-      [60, 80, 60, 40],
-      [60, 40, 75, 55],
-      [75, 55, 90, 40],
-      [90, 40, 90, 80]
-    ];
 
-    const endMain = [
-      [30, 40, 40, 80],
-      [40, 80, 40, 80],
-      [40, 80, 70, 75],
-      [70, 75, 60, 90],
-      [60, 90, 70, 95],
-      [70, 95, 45, 115]
-    ];
+  const startMain = [
+    [30, 40, 30, 80],
+    [30, 80, 60, 80],
+    [60, 80, 60, 40],
+    [60, 40, 75, 55],
+    [75, 55, 90, 40],
+    [90, 40, 90, 80]
+  ];
 
-    const lerp = (a, b, t) => a + (b - a) * t;
+   const  endMain = [
+    [30, 32, 32, 75],
+    [32, 75, 32, 75],
+    [32, 75, 70, 75],
+    [70, 75, 60, 90],
+    [60, 90, 70, 95],
+    [70, 95, 45, 115]
+  ];
 
-    const drawLines = (lines, offsetX, offsetY, scale, color) => {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 10;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
 
-      for (let i = 0; i < lines.length; i++) {
-        const [x1, y1, x2, y2] = lines[i];
-        ctx.beginPath();
-        ctx.moveTo(offsetX + x1 * scale, offsetY + y1 * scale);
-        ctx.lineTo(offsetX + x2 * scale, offsetY + y2 * scale);
-        ctx.stroke();
+  const all = [...startMain.flat(), ...endMain.flat()];
+  let minX = Infinity, maxX = -Infinity;
+  let minY = Infinity, maxY = -Infinity;
+
+  for (let i = 0; i < all.length; i += 2) {
+    minX = Math.min(minX, all[i]);
+    maxX = Math.max(maxX, all[i]);
+    minY = Math.min(minY, all[i + 1]);
+    maxY = Math.max(maxY, all[i + 1]);
+  }
+
+  const shapeWidth = maxX - minX;
+  const shapeHeight = maxY - minY;
+
+
+  const logoEl = document.getElementById("lm-icon");
+  const rect = logoEl?.getBoundingClientRect();
+
+  const targetX = rect ? rect.left + rect.width / 2 : 35;
+  const targetY = rect ? rect.top + rect.height / 2 : 45;
+
+  const targetSize = rect?.width || 50;
+
+  const finalScale = targetSize / shapeHeight;
+  const initialScale = finalScale * 3;
+
+  const baseStroke = 8;
+
+  const state = {
+    morphT: 0,
+    morphSpeed: 0.02,
+
+    moveT: 0,
+    moveSpeed: 0.02,
+
+    moving: false,
+    settled: false,
+
+    posX: width / 2,
+    posY: height / 2,
+    scale: initialScale,
+
+    mouseX: width / 2,
+    mouseY: height / 2
+  };
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+
+  const handleMouseMove = e => {
+    state.mouseX = e.clientX;
+    state.mouseY = e.clientY;
+  };
+
+  window.addEventListener("mousemove", handleMouseMove);
+
+  const drawShape = lines => {
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = baseStroke * state.scale-1; // proportional
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    ctx.beginPath();
+
+    lines.forEach(([x1, y1, x2, y2]) => {
+      ctx.moveTo(
+        state.posX + (x1 - minX - shapeWidth / 2) * state.scale,
+        state.posY + (y1 - minY - shapeHeight / 2) * state.scale
+      );
+      ctx.lineTo(
+        state.posX + (x2 - minX - shapeWidth / 2) * state.scale,
+        state.posY + (y2 - minY - shapeHeight / 2) * state.scale
+      );
+    });
+
+    ctx.stroke();
+  };
+
+  const animate = () => {
+    ctx.clearRect(0, 0, width, height);
+    if (!state.moving) {
+      state.morphT += state.morphSpeed;
+      if (state.morphT >= 1) {
+        state.morphT = 1;
+        state.moving = true;
       }
-    };
+    }
 
-    const drawMainAnimation = () => {
-      const lines = [];
-      for (let i = 0; i < startMain.length; i++) {
-        const [x1s, y1s, x2s, y2s] = startMain[i];
-        const [x1e, y1e, x2e, y2e] = endMain[i];
-        lines.push([
-          lerp(x1s, x1e, state.t),
-          lerp(y1s, y1e, state.t),
-          lerp(x2s, x2e, state.t),
-          lerp(y2s, y2e, state.t)
-        ]);
+    if (state.moving && !state.settled) {
+      state.moveT += state.moveSpeed;
+      const eased = easeOut(state.moveT);
+
+      state.posX = lerp(width / 2, targetX, eased);
+      state.posY = lerp(height / 2, targetY, eased);
+      state.scale = lerp(initialScale, finalScale, eased);
+
+      if (state.moveT >= 1) {
+        state.settled = true;
+             setIsComplete(true);
       }
+    }
 
-      drawLines(lines, state.posX - 60, state.posY - 60, state.myScale, "white");
+    const currentLines = startMain.map((line, i) => {
+      const [x1s, y1s, x2s, y2s] = line;
+      const [x1e, y1e, x2e, y2e] = endMain[i];
 
-      state.t += state.speed;
-      if (state.t > 1) {
-        state.t = 1;
-        state.mainIsDone = true;
-      }
-    };
+      return [
+        lerp(x1s, x1e, state.morphT),
+        lerp(y1s, y1e, state.morphT),
+        lerp(x2s, x2e, state.morphT),
+        lerp(y2s, y2e, state.morphT)
+      ];
+    });
 
-    const updateScale = () => {
-      if (state.zoomingIn) {
-        state.scaleT += state.scaleSpeed;
-        if (state.scaleT >= 1) {
-          state.scaleT = 1;
-          state.zoomingIn = false;
-        }
-      } else {
-        state.scaleT -= state.scaleSpeed;
-        if (state.scaleT <= 0) {
-          state.scaleT = 0;
-        }
-      }
+    drawShape(currentLines);
+    animationRef.current = requestAnimationFrame(animate);
+  };
 
-      state.myScale = lerp(state.baseScale, state.zoomScale, state.scaleT);
-    };
+  animate();
 
-    const animate = () => {
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, width, height);
+  return () => {
+    window.removeEventListener("mousemove", handleMouseMove);
+    cancelAnimationFrame(animationRef.current);
+  };
+}, []);
 
-      updateScale();
-      drawMainAnimation();
-
-      if (state.mainIsDone && state.scaleT === 0) {
-        setIsComplete(true);
-        cancelAnimationFrame(animationRef.current);
-        return;
-      }
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (isComplete) {
       const timer = setTimeout(() => {
         onComplete();
-      }, 300); // Fade transition time
+      }, 300); 
       return () => clearTimeout(timer);
     }
   }, [isComplete, onComplete]);
@@ -2172,6 +2208,7 @@ position: fixed;
   font-size: 18px;
   cursor: pointer;
   transition: background 0.2s;
+r
   &:hover {
     background: red;
     color: theme.color;
@@ -2217,6 +2254,10 @@ function ScrollToTop() {
   return <ScrollToTopButton onClick={scrollToTop}>↑</ScrollToTopButton>;
 }
 
+
+
+
+
 function ScrollToHome() {
   const theme = useTheme();
   const iconSrc = theme.color === "white" ? "/logo192_dark.png" : "/logo192_light.png";
@@ -2225,7 +2266,7 @@ function ScrollToHome() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  return <LMIcon src={iconSrc} alt="LM Icon" onClick={handleClick} />;
+  return <LMIcon id="lm-icon" src={iconSrc} alt="LM Icon" onClick={handleClick} />;
 }
 
 function App() {
