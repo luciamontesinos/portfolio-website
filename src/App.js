@@ -2,10 +2,6 @@ import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import styled, { createGlobalStyle, ThemeProvider } from "styled-components";
 import { projectList, socialLinks, citiesList } from "./data"; // Import the citiesList
-//import { HashRouter as Router } from "react-router-dom"; // Use BrowserRouter instead of Router
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import Slider from "react-slick";
 import { Splide, SplideSlide } from "@splidejs/react-splide"; // Import Splide components
 import "@splidejs/react-splide/css"; // Import Splide styles
 import '@splidejs/splide/css';
@@ -636,6 +632,14 @@ const SplideWrapper = styled.div`
   overflow: hidden; 
  
   box-sizing: border-box; 
+  .splide__arrow {
+    background: rgba(255, 255, 255, 0.8);
+    opacity: 0.7;
+  }
+  
+  .splide__pagination__page.is-active {
+    background: ${({ theme }) => theme.text};
+  }
 
 `;
 
@@ -736,40 +740,58 @@ const CoverflowContainer = styled.div`
 `;
 
 const MobileCarouselContainer = styled.div`
-  width: 100%;
   display: none;
-  margin: 20px 0;
-
+  
   @media (max-width: 768px) {
     display: block;
-  }
-
-  .swiper {
     width: 100%;
     padding: 20px 0;
   }
+`;
 
-  .swiper-slide {
-    height: 400px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
 
-  .swiper-slide img {
+
+const CarouselCard = styled.div`
+  position: relative;
+  width: 100%;
+  height: 400px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  
+  img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 10px;
   }
+`;
 
-  .swiper-pagination-bullet {
-    background: ${({ theme }) => theme.color};
-  }
+const CarouselOverlay = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+`;
 
-  .swiper-pagination-bullet-active {
-    background: red;
-  }
+const CarouselText = styled.p`
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  flex: 1;
+`;
+
+const CarouselArrow = styled.div`
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  margin-left: 10px;
 `;
 
 const CardStack = styled.div`
@@ -944,6 +966,167 @@ function Navigation() {
   );
 }
 
+// Logo Animation Component
+// Overlay animation that plays once on page load
+const OverlayContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: ${props => props.fadeOut ? 0 : 1};
+  transition: opacity 0.2s ease-out;
+  pointer-events: ${props => props.fadeOut ? 'none' : 'auto'};
+`;
+
+function LogoAnimationOverlay({ onComplete }) {
+  const canvasRef = useRef(null);
+  const animationRef = useRef(null);
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+
+    const state = {
+      t: 0,
+      speed: 0.01,
+      mainIsDone: false,
+      posX: width / 2,
+      posY: height / 2,
+      myScale: 1.5,
+      zoomingIn: true,
+      scaleT: 0,
+      scaleSpeed: 0.01,
+      baseScale: 1.5,
+      zoomScale: 2.0
+    };
+
+    const startMain = [
+      [30, 40, 30, 80],
+      [30, 80, 60, 80],
+      [60, 80, 60, 40],
+      [60, 40, 75, 55],
+      [75, 55, 90, 40],
+      [90, 40, 90, 80]
+    ];
+
+    const endMain = [
+      [30, 40, 40, 80],
+      [40, 80, 40, 80],
+      [40, 80, 70, 75],
+      [70, 75, 60, 90],
+      [60, 90, 70, 95],
+      [70, 95, 45, 115]
+    ];
+
+    const lerp = (a, b, t) => a + (b - a) * t;
+
+    const drawLines = (lines, offsetX, offsetY, scale, color) => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 10;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      for (let i = 0; i < lines.length; i++) {
+        const [x1, y1, x2, y2] = lines[i];
+        ctx.beginPath();
+        ctx.moveTo(offsetX + x1 * scale, offsetY + y1 * scale);
+        ctx.lineTo(offsetX + x2 * scale, offsetY + y2 * scale);
+        ctx.stroke();
+      }
+    };
+
+    const drawMainAnimation = () => {
+      const lines = [];
+      for (let i = 0; i < startMain.length; i++) {
+        const [x1s, y1s, x2s, y2s] = startMain[i];
+        const [x1e, y1e, x2e, y2e] = endMain[i];
+        lines.push([
+          lerp(x1s, x1e, state.t),
+          lerp(y1s, y1e, state.t),
+          lerp(x2s, x2e, state.t),
+          lerp(y2s, y2e, state.t)
+        ]);
+      }
+
+      drawLines(lines, state.posX - 60, state.posY - 60, state.myScale, "white");
+
+      state.t += state.speed;
+      if (state.t > 1) {
+        state.t = 1;
+        state.mainIsDone = true;
+      }
+    };
+
+    const updateScale = () => {
+      if (state.zoomingIn) {
+        state.scaleT += state.scaleSpeed;
+        if (state.scaleT >= 1) {
+          state.scaleT = 1;
+          state.zoomingIn = false;
+        }
+      } else {
+        state.scaleT -= state.scaleSpeed;
+        if (state.scaleT <= 0) {
+          state.scaleT = 0;
+        }
+      }
+
+      state.myScale = lerp(state.baseScale, state.zoomScale, state.scaleT);
+    };
+
+    const animate = () => {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, width, height);
+
+      updateScale();
+      drawMainAnimation();
+
+      if (state.mainIsDone && state.scaleT === 0) {
+        setIsComplete(true);
+        cancelAnimationFrame(animationRef.current);
+        return;
+      }
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isComplete) {
+      const timer = setTimeout(() => {
+        onComplete();
+      }, 300); // Fade transition time
+      return () => clearTimeout(timer);
+    }
+  }, [isComplete, onComplete]);
+
+  return (
+    <OverlayContainer fadeOut={isComplete}>
+      <canvas ref={canvasRef} width={window.innerWidth} height={window.innerHeight} />
+    </OverlayContainer>
+  );
+}
+
+
 function Home({ setExpandedProject }) {
   const highlights = [
 
@@ -1044,93 +1227,109 @@ function Home({ setExpandedProject }) {
   }, []);
 
   return (
-    <Section id="home">
-      <h1 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ cursor: 'pointer' }}>
-        HIGHLIGHTS
-      </h1>
-      {/* Desktop: Draggable Cards */}
-      <CoverflowContainer
-        ref={containerRef}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {isHovered && !dragState.current.isDragging && (
-          <DragHint> (DRAG TO REVEAL)</DragHint>
-        )}
-        <CardStack>
-          {cards.map((card) => (
-            <DraggableCard
-              key={card.id}
-              style={{
-                left: `calc(50% + ${card.x}px)`,
-                top: `calc(50% + ${card.y}px)`,
-                transform: `translate(-50%, -50%) rotate(${card.rotation}deg)`,
-                zIndex: card.zIndex,
-              }}
-              onMouseDown={(e) => handleMouseDown(e, card.id)}
-            >
-              <img src={card.image} alt={card.text} />
-              <div className="card-overlay">
-                <p
-                  className="card-text"
-                  style={{ cursor: 'pointer',  }}
-                  onClick={() => {
-                    setExpandedProject(card.projectId);
-                    const projectsSection = document.getElementById("projects");
-                    if (projectsSection) {
-                      projectsSection.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
-                >
-                  {card.text}
-                </p>
-                <button
-                  className="card-button"
-                  onClick={() => {
-                    setExpandedProject(card.projectId);
-                    const projectsSection = document.getElementById("projects");
-                    if (projectsSection) {
-                      projectsSection.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
-                >
-                  →
-                </button>
-              </div>
-            </DraggableCard>
-          ))}
-        </CardStack>
-      </CoverflowContainer>
-
-      {/* Mobile: Simple Carousel */}
-      <MobileCarouselContainer>
-        <Slider {...{
-          dots: true,
-          infinite: true,
-          speed: 500,
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          autoplay: true,
-          autoplaySpeed: 5000,
-        }}>
-          {highlights.map((highlight, index) => (
-            <div key={index} style={{ position: 'relative', height: '400px' }}>
-              <img
-                src={highlight.image}
-                alt={highlight.text}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  borderRadius: "10px",
+  <Section id="home">
+    <h1 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ cursor: 'pointer' }}>
+      HIGHLIGHTS
+    </h1>
+    
+    {/* Desktop: Draggable Cards */}
+    <CoverflowContainer
+      ref={containerRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {isHovered && !dragState.current.isDragging && (
+        <DragHint>(DRAG TO REVEAL)</DragHint>
+      )}
+      <CardStack>
+        {cards.map((card) => (
+          <DraggableCard
+            key={card.id}
+            style={{
+              left: `calc(50% + ${card.x}px)`,
+              top: `calc(50% + ${card.y}px)`,
+              transform: `translate(-50%, -50%) rotate(${card.rotation}deg)`,
+              zIndex: card.zIndex,
+            }}
+            onMouseDown={(e) => handleMouseDown(e, card.id)}
+          >
+            <img src={card.image} alt={card.text} />
+            <div className="card-overlay">
+              <p
+                className="card-text"
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  setExpandedProject(card.projectId);
+                  const projectsSection = document.getElementById("projects");
+                  if (projectsSection) {
+                    projectsSection.scrollIntoView({ behavior: "smooth" });
+                  }
                 }}
-              />
+              >
+                {card.text}
+              </p>
+              <button
+                className="card-button"
+                onClick={() => {
+                  setExpandedProject(card.projectId);
+                  const projectsSection = document.getElementById("projects");
+                  if (projectsSection) {
+                    projectsSection.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+              >
+                →
+              </button>
             </div>
+          </DraggableCard>
+        ))}
+      </CardStack>
+    </CoverflowContainer>
+
+    {/* Mobile: Carousel */}
+    <MobileCarouselContainer>
+      <SplideWrapper>
+        <Splide
+          options={{
+            type: "slide",
+            perPage: 1,
+            perMove: 1,
+            gap: "16px",
+            padding: { left: '10%', right: '10%' },
+            focus: "center",
+            autoWidth: false,
+            arrows: true,
+            pagination: true,
+          }}
+        >
+          {highlights.slice()
+  .sort((a, b) => b.projectId - a.projectId).map((highlight, index) => (
+            <SplideSlide key={index}>
+              <CarouselCard
+                onClick={() => {
+                  setExpandedProject(highlight.projectId);
+                  const projectsSection = document.getElementById("projects");
+                  if (projectsSection) {
+                    projectsSection.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+              >
+                <img
+                  src={highlight.image}
+                  alt={highlight.text}
+                />
+                <CarouselOverlay>
+                  <CarouselText>{highlight.text}</CarouselText>
+                  <CarouselArrow>→</CarouselArrow>
+                </CarouselOverlay>
+              </CarouselCard>
+            </SplideSlide>
           ))}
-        </Slider>
-      </MobileCarouselContainer>
-    </Section>
-  );
+        </Splide>
+      </SplideWrapper>
+    </MobileCarouselContainer>
+  </Section>
+);
 }
 
 function Projects({ expandedProject, setExpandedProject }) {
@@ -1484,39 +1683,42 @@ function Projects({ expandedProject, setExpandedProject }) {
   );
 }
 
-const AboutContainer = styled.div`
+const DesktopLayout = styled.div`
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 40px;
-  align-items: start;
-  position: relative;
-
+  
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 20px;
-
-     h2 {margin-bottom: 2px;
-    margin-top: 2px;
-    font-size: 15px;}
-    p {font-size: 8px; 
-    margin-top: 5px;
-    margin-bottom: 30px;}
+    display: none;
   }
-    h2 {margin-bottom: 2px;
-    margin-top: 2px;
-    font-size: 35px;}
-    p {font-size: 26px; 
-    margin-top: 5px;
-    margin-bottom: 30px;}
 `;
 
-const AboutRow = styled.div`
-  display: contents;
-  text-align: justify;
-  @media (min-width: 768px) {
-    display: grid;
-    grid-template-columns:  8fr; 
-    gap: 16px;
+const MobileLayout = styled.div`
+  display: none;
+  
+  @media (max-width: 768px) {
+    display: block;
+  }
+  
+  > div {
+    margin-bottom: 30px;
+  }
+  
+  h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  p {
+    font-size: 16px;
+    text-align: justify;
   }
 `;
 
@@ -1524,19 +1726,21 @@ const AboutImagesContainer = styled.div`
   position: relative;
   width: 100%;
   height: 900px;
-  display: none;
   overflow: visible;
-
-  @media (min-width: 769px) {
-    display: block;
-  }
 `;
 
-const MobileAboutImagesContainer = styled.div`
-  display: none;
-
-  @media (min-width: 769px) {
-    display: none;
+const AboutTextContainer = styled.div`
+  h2 {
+    font-size: 35px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+  }
+  
+  p {
+    font-size: 26px;
+    margin-top: 5px;
+    margin-bottom: 30px;
+    text-align: justify;
   }
 `;
 
@@ -1565,25 +1769,7 @@ const DraggableAboutImage = styled.div`
     height: 100%;
     object-fit: cover;
   }
-
-  @media (max-width: 768px) {
-    position: static;
-    width: 100%;
-    height: auto;
-    margin-bottom: 20px;
-    cursor: default;
-  }
 `;
-
-const AboutContentContainer = styled.div`
-  grid-column: 2;
-  position: relative;
-
-  @media (max-width: 768px) {
-    grid-column: 1;
-  }
-`;
-
 
 
 
@@ -1661,119 +1847,86 @@ function About() {
       window.removeEventListener("mouseup", handleMouseUp);
     };
   }, []);
+  const [aboutContent, setAboutContent] = useState("");
+
+useEffect(() => {
+  const fetchMarkdown = async () => {
+    try {
+      const response = await fetch("about.md");
+      if (!response.ok) {
+        console.error(`Failed to fetch about.md: ${response.status}`);
+        return;
+      }
+      const text = await response.text();
+      setAboutContent(text);
+    } catch (error) {
+      console.error("Error fetching about.md:", error);
+    }
+  };
+
+  fetchMarkdown();
+}, []);
+
+const aboutSections = aboutContent
+  ? aboutContent.split(/(?=^## )/m).map((section) => {
+      const [title, ...content] = section.split("\n").filter((line) => line.trim() !== "");
+      return {
+        title: title ? title.replace("## ", "") : "",
+        content: content.join("\n")
+      };
+    }).filter(section => section.title) // Remove empty sections
+  : [];
 
   return (
-    <Section id="about">
-      <h1 onClick={() => document.getElementById("about").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>ABOUT ME</h1>
-      {/* Desktop Layout */}
-      <AboutContainer>
-        {/* Desktop: Draggable Images */}
-        <AboutImagesContainer ref={containerRef}>
-          {aboutImages.map((img) => (
-            <DraggableAboutImage
-              key={img.id}
-              style={{
-                left: `${img.x}px`,
-                top: `${img.y}px`,
-                zIndex: img.zIndex,
-              }}
-              onMouseDown={(e) => handleMouseDown(e, img.id)}
-            >
-              <img src={img.src} alt={img.alt} />
-            </DraggableAboutImage>
-          ))}
-        </AboutImagesContainer>
-
-        {/* Mobile: Static Images */}
-        <MobileAboutImagesContainer>
-          {images.map((img) => (
-            <img
-              key={img.id}
-              src={img.src}
-              alt={img.alt}
-            />
-          ))}
-        </MobileAboutImagesContainer>
-
-        {/* Right Column - Text */}
-        <AboutContentContainer>
-          <AboutRow>
-            <h2>My digital self</h2>
-            <p>
-              I am a creative technologist and researcher passionate about making things you can touch, play with and get immersed in. With a technical background and creative and humanistic interests, I design and build interactive artifacts, to explore how can technology invite us to participate, create, play and pay attention to the world around us. I thrive in maker spaces where I can prototype ideas and test them in the real world. 
-            </p>
-          </AboutRow>
-          <AboutRow>
-            <h2>My analog self</h2>
-            <p>
-              I was born and raised in Madrid, but I am currently based in Copenhagen. I have always been passionate about music, and
-              since I was 7, it has played a very important role in my life. Back then was when I started to play the drums. As part of
-              that journey, I have been working as a drum teacher for kids, playing semi-professionally in a few bands, composing and
-              recording an album, and playing it live in some venues and events. Nowadays, my music career is a bit calmer, but I still
-              play the drums and I am learning to play the bass. A recent hobby I've been enjoying lately is solving jigsaw puzzles. I
-              know, it doesn't sound as cool as being a rockstar but honestly, If there were such a thing as being a "puzzlestar", I
-              would probably be one.
-            </p>
-          </AboutRow>
-        </AboutContentContainer>
-      </AboutContainer>
-
-      {/* Mobile Layout */}
-      <div style={{ display: 'none' }} className="mobile-about-layout">
-        <div style={{ marginBottom: '30px' }}>
-          <h2 style={{ marginBottom: '15px', fontSize: '15px' }}>MY DIGITAL SELF</h2>
-          <img
-            src={images[0].src}
-            alt={images[0].alt}
+  <Section id="about">
+    <h1 onClick={() => document.getElementById("about").scrollIntoView({ behavior: "smooth" })} style={{ cursor: 'pointer' }}>ABOUT ME</h1>
+    
+    {aboutSections.length === 0 ? (
+      <p>Loading...</p>
+    ) : (
+      <>
+    <DesktopLayout>
+      <AboutImagesContainer ref={containerRef}>
+        {aboutImages.map((img) => (
+          <DraggableAboutImage
+            key={img.id}
             style={{
-              width: "100%",
-              height: "auto",
-              borderRadius: "10px",
-              objectFit: "contain",
-              marginBottom: "20px",
+              left: `${img.x}px`,
+              top: `${img.y}px`,
+              zIndex: img.zIndex,
             }}
-          />
-          <p style={{ fontSize: '8px', marginTop: '5px', marginBottom: '30px' }}>
-            I am a creative technologist and researcher passionate about making things you can touch, play with and get immersed in. With a technical background and creative and humanistic interests, I design and build interactive artifacts, to explore how can technology invite us to participate, create, play and pay attention to the world around us. I thrive in maker spaces where I can prototype ideas and test them in the real world. 
-          </p>
-        </div>
-        <div>
-          <h2 style={{ marginBottom: '15px', fontSize: '15px' }}>MY ANALOG SELF</h2>
-          <img
-            src={images[1].src}
-            alt={images[1].alt}
-            style={{
-              width: "100%",
-              height: "auto",
-              borderRadius: "10px",
-              objectFit: "contain",
-              marginBottom: "20px",
-            }}
-          />
-          <p style={{ fontSize: '8px', marginTop: '5px', marginBottom: '30px' }}>
-            I was born and raised in Madrid, but I am currently based in Copenhagen. I have always been passionate about music, and
-            since I was 7, it has played a very important role in my life. Back then was when I started to play the drums. As part of
-            that journey, I have been working as a drum teacher for kids, playing semi-professionally in a few bands, composing and
-            recording an album, and playing it live in some venues and events. Nowadays, my music career is a bit calmer, but I still
-            play the drums and I am learning to play the bass. A recent hobby I've been enjoying lately is solving jigsaw puzzles. I
-            know, it doesn't sound as cool as being a rockstar but honestly, If there were such a thing as being a "puzzlestar", I
-            would probably be one.
-          </p>
-        </div>
-      </div>
+            onMouseDown={(e) => handleMouseDown(e, img.id)}
+          >
+            <img src={img.src} alt={img.alt} />
+          </DraggableAboutImage>
+        ))}
+      </AboutImagesContainer>
 
-      <style>{`
-        @media (max-width: 768px) {
-          #about > div[style*="display: block"] {
-            display: none !important;
-          }
-          .mobile-about-layout {
-            display: block !important;
-          }
-        }
-      `}</style>
-    </Section>
-  );
+      <AboutTextContainer>
+        {aboutSections.map((section, index) => (
+              <div key={index}>
+                <h2>{section.title}</h2>
+                <ReactMarkdown>{section.content}</ReactMarkdown>
+              </div>
+            ))}
+      </AboutTextContainer>
+    </DesktopLayout>
+
+    {/* Mobile Layout - Single column, alternating */}
+    <MobileLayout>
+      {aboutSections.map((section, index) => (
+            <div key={index}>
+              <h2>{section.title}</h2>
+              <img src={images[index].src} alt={images[index].alt} />
+              <ReactMarkdown>{section.content}</ReactMarkdown>
+            </div>
+          ))}
+    </MobileLayout>
+      </>
+    )}
+  </Section>
+);
+
 }
 
 function Contact() {
@@ -2079,13 +2232,18 @@ function App() {
   const [theme, setTheme] = useState("dark");
   const themeObj = theme === "dark" ? darkTheme : lightTheme;
   const [expandedProject, setExpandedProject] = useState(null);
+  const [showOverlay, setShowOverlay] = useState(true);
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
- 
+
+  const handleOverlayComplete = () => {
+    setShowOverlay(false);
+  };
 
   return (
     <ThemeProvider theme={themeObj}>
       <GlobalStyle />
+      {showOverlay && <LogoAnimationOverlay onComplete={handleOverlayComplete} />}
       <ScrollToHome />
       <ContentWrapper>
         <Navigation/>
