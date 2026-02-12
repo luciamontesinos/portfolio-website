@@ -1,6 +1,6 @@
 This is the end result of my master thesis, done in collaboration with two other MSc students. Kinetip is a gesture-based interactive game platform designed to motivate patients to be physically active during their hospitalization time. [Click here to try it out](https://kinetip.dk/)
 
-Lack of physical activity post-surgery is widely acknowledged as both a significant barrier to successful recovery and contributor to post-operative complications. After the introducition of single-patient hospital rooms, the healthcare staff at Herlev Hospital noticed a decline in the physical activity of the patients. 
+Lack of physical activity post-surgery is widely acknowledged as both a significant barrier to successful recovery and contributor to post-operative complications. After the introduction of single-patient hospital rooms, the healthcare staff at Herlev Hospital noticed a decline in the physical activity of the patients. 
 
 Following a mixed-methods user-centered design research process, we developed a digital game platform: Kinetip. This system is designed to support a variety of games through gesture-based control; encouraging users to move their hands and arms while playing and interacting with the hospital terminal device. 
 

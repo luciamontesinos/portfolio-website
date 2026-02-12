@@ -30,24 +30,24 @@
 
 
 # Teaching
-- 2025, Guest lecture on *AI and Aesthetics* for the course *Designing Aestehtic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
+- 2025, Guest lecture on *AI and Aesthetics* for the course *Designing Aesthetic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
 
-- 2025, Guest lecture on *Prototyping with electronics* for the course *Designing Aestehtic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
+- 2025, Guest lecture on *Prototyping with electronics* for the course *Designing Aesthetic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
 
 - 2025, Guest lecture on *Prototyping with Technology* for the course *CTEC700 Space, Image and Sound* of the Bachelors in Creative Technologies at Auckland University of Technology.
 
-- 2024, Guest lecture on *AI and Aesthetics* for the course *Designing Aestehtic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
+- 2024, Guest lecture on *AI and Aesthetics* for the course *Designing Aesthetic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
 
-- 2023, Guest lecture on *AI and Aesthetics* for the course *Designing Aestehtic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
+- 2023, Guest lecture on *AI and Aesthetics* for the course *Designing Aesthetic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
 
 # Supervising
-- 2025, Supervisor of Research Project (7.5 ECTS) for 1 student enroled in the MSc in Software Design at IT University of Copenhagen. *"GenAI Planetary Personas".*
+- 2025, Supervisor of Research Project (7.5 ECTS) for 1 student enrolled in the MSc in Software Design at IT University of Copenhagen. *"GenAI Planetary Personas".*
 
-- 2024, Supervisor of Research Project (7.5 ECTS) for 1 student enroled in the MSc in Computer Science at IT University of Copenhagen. *"Making Harmony Accessible for Non-musicians through Virtual Means".*
+- 2024, Supervisor of Research Project (7.5 ECTS) for 1 student enrolled in the MSc in Computer Science at IT University of Copenhagen. *"Making Harmony Accessible for Non-musicians through Virtual Means".*
 
-- 2024, Supervisor of Final Project (15 ECTS) for 4 students enroled in the BSc in Digital Design and Interactive Technologies. *"Enhancing the Tropezoo Experience through Playful Digital Design. A case study in collaboration with Copenhagen Zoo".*
+- 2024, Supervisor of Final Project (15 ECTS) for 4 students enrolled in the BSc in Digital Design and Interactive Technologies. *"Enhancing the Tropezoo Experience through Playful Digital Design. A case study in collaboration with Copenhagen Zoo".*
 
-- 2024, Supervisor of Final Project (15 ECTS) for 2 students enroled in the BSc in Digital Design and Interactive Technologies. *"Enhancing Prenatal Care with AI: Designing and Testing a Conversational Chatbot for Expectant People and Ethical Considerations when Implementing AI in Healthcare".*
+- 2024, Supervisor of Final Project (15 ECTS) for 2 students enrolled in the BSc in Digital Design and Interactive Technologies. *"Enhancing Prenatal Care with AI: Designing and Testing a Conversational Chatbot for Expectant People and Ethical Considerations when Implementing AI in Healthcare".*
 
 
 # Reviewing

@@ -6,12 +6,12 @@ This resulted in a set of 7 acrylic pipes, each 110 centimeters tall, arranged i
 
 To interact with Tubularium, you simply touch the sensing areas and a note will trigger, followed with light feedback. Using a controller, participants can change the instrument sound, key, and emotion, and switch between a single-note mode for improvising melodies, and a chord mode where the lights guide you through a chord progression based on the emotion chosen.
 
-I designed and build every bit of Tubularium, from building the structure and the pipes, soldering the electronics, 3D printing, and all the software (and the many iterations that happened until reaching this versuon).
+I designed and build every bit of Tubularium, from building the structure and the pipes, soldering the electronics, 3D printing, and all the software (and the many iterations that happened until reaching this version).
 
 
 ## Publications
 
-There is one paper published about it, which you can [check it out here](https://zenodo.org/records/15699662). The paper presents the design and evaluation of Tubularium. The main findings are that that Tubularium succesfully allowed non musicians to engage in music making, and for many it resulted in a an aesthetic experience. Moreover, we observed that the full-body scale of the interface mattered, and that it allowed participants to approach it and appropriate it in many different ways. 
+There is one paper published about it, which you can [check it out here](https://zenodo.org/records/15699662). The paper presents the design and evaluation of Tubularium. The main findings are that that Tubularium successfully allowed non musicians to engage in music making, and for many it resulted in a an aesthetic experience. Moreover, we observed that the full-body scale of the interface mattered, and that it allowed participants to approach it and appropriate it in many different ways. 
 
 
 ## Media
