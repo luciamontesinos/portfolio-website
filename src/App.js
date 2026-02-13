@@ -2070,9 +2070,10 @@ function ScrollToTop() {
 function AnimatedLogo(){
     const [animationStage, setAnimationStage] = useState('initial');
     const [morphProgress, setMorphProgress] = useState(0);
-    const [mousePos, setMousePos] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
     const logoRef = useRef(null);
     const theme = useTheme();
+    const [isBlinking,setIsBlinking] = useState(false);
+
 
     const strokeColor = theme.color
   
@@ -2137,16 +2138,21 @@ function AnimatedLogo(){
         requestAnimationFrame(animate);
       }
     }, [animationStage]);
-  
-    // Mouse tracking
+
+
     useEffect(() => {
-      const handleMouseMove = (e) => {
-        setMousePos({ x: e.clientX, y: e.clientY });
-      };
+    if (animationStage !== 'complete') return;
+
+    const blinkInterval = setInterval(() => {
+      setIsBlinking(true);
+      setTimeout(() => {
+        setIsBlinking(false);
+      }, 200); // Blink duration: 0.4 seconds
+    }, 4000); // Blink every 4 seconds
+
+    return () => clearInterval(blinkInterval);
+  }, [animationStage]);
   
-      window.addEventListener('mousemove', handleMouseMove);
-      return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, []);
   
     const renderLines = () => {
       let lines;
@@ -2176,18 +2182,17 @@ function AnimatedLogo(){
           x2={line[2]}
           y2={line[3]}
           stroke={strokeColor}
-          strokeWidth="5"
+          strokeWidth="8"
           strokeLinecap="round"
         />
       ));
     };
   
-    const renderEyes = () => {
-      if (animationStage !== 'complete') return null;
-  
-      if (!logoRef.current) return null;
+   const renderEyes = () => {
+    if (animationStage !== 'complete' || isBlinking || !logoRef.current) return null;
+ 
 
-      // Left eye center position (in viewBox coordinates)
+    // Left eye center position (in viewBox coordinates)
       const leftEyeCenterX = 15;
       const leftEyeCenterY = 60;
       
@@ -2195,34 +2200,14 @@ function AnimatedLogo(){
       const rightEyeCenterX = 60;
       const rightEyeCenterY = 50;
 
-      // Calculate angle and distance from logo center to mouse
-      const leftdx = mousePos.x - leftEyeCenterX;
-      const leftdy = mousePos.y - leftEyeCenterY;
-      const leftangle = Math.atan2(leftdy, leftdx);
 
-      const rightdx = mousePos.x - rightEyeCenterX;
-      const rightdy = mousePos.y - rightEyeCenterY;
-      const rightangle = Math.atan2(rightdy, rightdx);
-      
-      // Maximum distance eyes can move from their center
-      const maxOffset = 7;
-      
-    
-      
-      // Calculate eye positions based on mouse angle
-      const leftEyeX = leftEyeCenterX + Math.cos(leftangle) * maxOffset;
-      const leftEyeY = leftEyeCenterY + Math.sin(leftangle) * maxOffset;
-      
-      const rightEyeX = rightEyeCenterX + Math.cos(rightangle) * maxOffset;
-      const rightEyeY = rightEyeCenterY + Math.sin(rightangle) * maxOffset;
-  
-      return (
-        <>
-          <circle cx={leftEyeX} cy={leftEyeY} r="8" fill={strokeColor} className="eye" />
-          <circle cx={rightEyeX} cy={rightEyeY} r="8" fill={strokeColor} className="eye" />
-        </>
-      );
-    };
+    return (
+      <>
+        <circle cx={leftEyeCenterX} cy={leftEyeCenterY} r="8" fill={strokeColor} />
+        <circle cx={rightEyeCenterX} cy={rightEyeCenterY} r="8" fill={strokeColor} />
+      </>
+    );
+  };
   
     const getContainerStyles = () => {
       const base = {
