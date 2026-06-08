@@ -1,0 +1,162 @@
+let gridP5 = new p5((g, document.getElementById('canvas_grid')"canvas_grid") => {
+
+  let value = 0;
+  let slots = [];
+  let keys = [];
+  let menuContainer;
+  let canvasContainer;
+  const characters = 'abcdefghijklmnopqrstuvwxyzåæø';
+  const numberOfLetters = 6;
+  const numberOfAttempts = 4;
+  //let fa;
+
+
+  // function preload() {
+  //   fa = loadFont('fa.otf');
+  // }
+
+  function drawGrid() {
+    g.push();
+    g.translate(limit / 2, -size / 2);
+
+    g.noStroke();
+    g.fill(128);
+
+    for (let row = 0; row < numberOfAttempts; row++) {
+      for (let col = 0; col < numberOfLetters; col++) {
+        slots[row][col].show();
+        //slots[row][col].morph();
+      }
+    }
+    //cursor.show();
+    g.textSize(size);
+    g.fill(255);
+    g.noStroke();
+
+    // DELETE BUTTON
+    g.stroke(128);
+    //textFont(fa);
+    g.textSize(size * 2);
+    var deleteIcon = "delete" //'\uf55a';
+    g.text(deleteIcon, size + limit / 8 + numberOfLetters * 2 * size, size + limit / 4 + numberOfAttempts * 2 * size);
+
+    g.pop();
+
+    enterButton = new Key(numberOfLetters + limit / 4 + 4 * size, size + limit / 2 + numberOfAttempts * 2 * size, "Enter Word", size * 12, size);
+    enterButton.show();
+
+
+
+  }
+
+  function drawKeyboard() {
+    for (let letter = 0; letter < characters.length; letter++) {
+
+      keys[letter].show();
+
+    }
+
+
+
+  }
+
+  function drawInstructions() {
+  }
+
+  function drawMenu() {
+    menuContainer.show();
+  }
+
+  function drawCanvasContainer() {
+    canvasContainer.show();
+
+
+  }
+
+
+
+
+  g.setup = () => {
+    myCanvas = createCanvas(window.innerWidth, window.innerHeight);
+    myCanvas.parent("my_canvas");
+    background(0);
+
+    limit = 600;
+    size = limit / 14;
+    for (let row = 0; row < numberOfAttempts; row++) {
+      slots.push([]);
+      y = size + limit / 2 + row * 2 * size;
+
+      for (let col = 0; col < numberOfLetters; col++) {
+
+        x = size + col * 2 * size;
+        slots[row].push(new Slot(x, y, 1.8 * size, row, col));
+      }
+    }
+
+    for (let i = 0; i < 10; i++) {
+      let letter = characters.charAt(i);
+      let x = size + limit / 2 - 4 * size;
+      let y = size + limit / 2 + i * size;
+      keys.push(new Key(x, y, letter, size, size));
+    }
+    for (let i = 10; i < 20; i++) {
+      let letter = characters.charAt(i);
+      let x = 2 * size + limit / 2 - 4 * size;
+      let y = size + limit / 2 + (i - 10) * size;
+      keys.push(new Key(x, y, letter, size, size));
+    }
+    for (let i = 20; i <= characters.length; i++) {
+      let letter = characters.charAt(i);
+      let x = 3 * size + limit / 2 - 4 * size;
+      let y = size + limit / 2 + (i - 20) * size;
+      keys.push(new Key(x, y, letter, size, size));
+    }
+
+
+
+    menuContainer = new Container(limit / 4, limit / 8, 1.5 * limit, 1.5 * limit, 200, 150);
+
+    canvasContainer = new Container(1.5 * limit + limit / 2, limit / 2, limit / 2, limit / 2, 200, 150);
+
+
+
+
+    drawMenu();
+    //drawCanvasContainer();
+    drawGrid();
+    drawKeyboard();
+
+
+  }
+
+
+  g.draw = () => {
+
+
+
+
+  }
+  g.mouseClicked = () => {
+    canvasContainer.clickListener(mouseX, mouseY);
+    // menuContainer.clickListener(mouseX, mouseY);
+
+    drawGrid();
+    drawKeyboard();
+  }
+});
+
+
+
+//function mouseClicked() {
+//  if(canvasContainer.contains(mouseX, mouseY)){
+//  if(value == 0){
+//       print("hello 0");
+//       value = 1;
+//    }
+//    else {
+//    print("bye 1");
+//      value =0;
+//    }
+//  }
+//}

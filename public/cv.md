@@ -30,6 +30,8 @@
 
 
 # Teaching
+- 2026, Workshop on *Making Interactive Cartography* for the creative coding camp *Creative Coding Camp 2026* by Cursor Mag (supported by Nordea Fonden) hosted in Ungdomsøen, co-organised with Louie Søs Meyer.
+
 - 2025, Guest lecture on *AI and Aesthetics* for the course *Designing Aesthetic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
 
 - 2025, Guest lecture on *Prototyping with electronics* for the course *Designing Aesthetic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
@@ -51,7 +53,7 @@
 
 
 # Reviewing
-- Conferences: *DRS'25*, *CHI'25*, *DIS'25*, *NIME'25*, *Creativity and Cognition '24*.
+- Conferences: *NIME'26* *DRS'26*, *CHI'25*, *DIS'25*, *NIME'25*, *Creativity and Cognition '24*.
 
 - Journals: *Digital Creativity*.
 
