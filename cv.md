@@ -29,8 +29,11 @@
 - Max/MSP/Jitter ☉ Processing ☉ Python ☉ Arduino ☉ Figma ☉ Flutter ☉ js ☉ HTML/CSS  
 
 
-# Teaching
+# Teaching & Workshops
+
 - 2026, Workshop on *Making Interactive Cartography* for the creative coding camp *Creative Coding Camp 2026* by Cursor Mag (supported by Nordea Fonden) hosted in Ungdomsøen, co-organised with Louie Søs Meyer.
+
+- 2026, Workshop on *It's Play NIME: Mapping Playfulness in NIME* for the International Conference on *New Interfaces for Musical Expression NIME 2026*  hosted in London, co-organised with Tara Pattenden and Lia Mice.
 
 - 2025, Guest lecture on *AI and Aesthetics* for the course *Designing Aesthetic User Experiences* of the Masters in Digital Design and Interactive Technologies at IT University of Copenhagen.
 
@@ -58,7 +61,8 @@
 - Journals: *Digital Creativity*.
 
 
-# Media
+# Media & Awards
+- 2026, Best Paper Award at ACM Designing Interactive System DIS 2026 for Machine Learning as Design Material for Music-Making.
 
 - 2024, **Live TV performance in *KNÆK CANCER 2024 et show for sagen*, TV2 (Denmark)**. Participated with my band, The Pølsehorns in a fundraising gala for cancer research. [**Gala summary**](https://underholdning.tv2.dk/live/2024-10-26-saadan-gik-det-ved-aarets-knaek-cancer)(in Danish).
 
