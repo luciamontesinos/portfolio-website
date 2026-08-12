@@ -295,7 +295,7 @@ function Home({ setExpandedProject }) {
       projectId: 3,
       title: "Kinetip",
       subtitle: "a word puzzle game with gestures",
-      description: "Kinetip is anInteractive virtual game based on gesture and handwriting recognition, designed for post-surgery recovery.",
+      description: "Kinetip is an Interactive virtual game based on gesture and handwriting recognition, designed for post-surgery recovery.",
       year: 2022,
     },
     {
