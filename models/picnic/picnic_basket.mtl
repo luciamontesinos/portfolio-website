@@ -1,0 +1,56 @@
+# Picnic basket materials (diffuse-only, no reflections)
+newmtl wicker_body
+Ka 0.000 0.000 0.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+Ns 1.0
+d 1.0
+illum 1
+map_Kd picnic_basket_texture.jpg
+Pr 1.0
+Pm 0.0
+
+newmtl wicker_rim
+Ka 0.000 0.000 0.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+Ns 1.0
+d 1.0
+illum 1
+map_Kd picnic_basket_texture.jpg
+Pr 1.0
+Pm 0.0
+
+newmtl wicker_lid
+Ka 0.000 0.000 0.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+Ns 1.0
+d 1.0
+illum 1
+map_Kd picnic_basket_texture.jpg
+Pr 1.0
+Pm 0.0
+
+newmtl gingham
+Ka 0.000 0.000 0.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+Ns 1.0
+d 1.0
+illum 1
+map_Kd picnic_basket_texture.jpg
+Pr 1.0
+Pm 0.0
+
+newmtl leather
+Ka 0.000 0.000 0.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+Ns 1.0
+d 1.0
+illum 1
+map_Kd picnic_basket_texture.jpg
+Pr 1.0
+Pm 0.0
+

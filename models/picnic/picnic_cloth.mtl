@@ -1,0 +1,10 @@
+newmtl cloth
+Ka 0.000 0.000 0.000
+Kd 1.000 1.000 1.000
+Ks 0.02 0.02 0.02
+Ns 4.0
+d 1.0
+illum 1
+map_Kd red_gingham_texture.jpg
+Pr 0.9
+Pm 0.0
