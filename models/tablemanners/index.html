@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table Manners – scale model</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<details id="hud" open>
+  <summary>Controls</summary>
+  <div class="hud-body">
+    <div class="btns" style="margin-top:0"><button id="reset">Reset scene</button></div>
+    <hr>
+      <div class="help">
+        <h4>Playing</h4>
+        <dl class="keys"><dt>Click / tap</dt><dd>an object to record a sound</dd><dt>Drag</dt><dd>an object to move it; bring two objects together to play their sounds</dd></dl>
+        <h4>Camera</h4>
+        <dl class="keys"><dt>Drag space</dt><dd>to orbit</dd><dt>Scroll / pinch</dt><dd>to zoom</dd></dl>
+      </div>
+  </div>
+</details>
+
+<div id="toast"></div>
+
+<script type="importmap">
+{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OBB } from 'three/addons/math/OBB.js';
+import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
+import { createStage, initHud, setupRenderer } from '../shared/stage.js';
+
+// 1 unit = 1 metre
+const T = 1.2;           // size multiplier for the plate, bowl and cup (the cutlery stays at 100 cm)
+const PERSON_HEIGHT = 1.70;
+// Khronos sample model: a plain, faceless humanoid figure (swap the URL for another .glb if you like)
+const PERSON_URL = 'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/RiggedFigure/glTF-Binary/RiggedFigure.glb';
+const COLORS = { red: 0xd8281e, blue: 0x2f55c0, green: 0x1d6a25, yellow: 0xf6d416 };
+
+
+// ---------- renderer / scene ----------
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+setupRenderer(renderer);
+document.body.appendChild(renderer.domElement);
+const canvas = renderer.domElement;
+
+const scene = new THREE.Scene();
+createStage(scene, { unit: 1, shadowExtent: 4 });   // backdrop, floor, grid and lights shared by all models
+initHud();
+
+const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.05, 100);
+camera.position.set(1.2, 2.7, 4.6);
+
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(0.5, 0.5, -0.1);
+controls.maxPolarAngle = Math.PI / 2 - 0.02;
+controls.minDistance = 0.5;
+controls.maxDistance = 14;
+controls.update();
+
+// ---------- paper-mâché look ----------
+function makeCrumpleTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 512;
+  const g = c.getContext('2d');
+  g.fillStyle = '#808080';
+  g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 1400; i++) {
+    const v = 60 + Math.random() * 140;
+    g.strokeStyle = `rgba(${v},${v},${v},0.45)`;
+    g.lineWidth = 0.6 + Math.random() * 1.8;
+    const x = Math.random() * 512, y = Math.random() * 512, a = Math.random() * Math.PI * 2, l = 10 + Math.random() * 50;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
+    g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(3, 3);
+  return t;
+}
+const crumple = makeCrumpleTexture();
+
+const paint = (color) => new THREE.MeshStandardMaterial({
+  color, roughness: 0.85, flatShading: true, side: THREE.DoubleSide,
+  bumpMap: crumple, bumpScale: 1.2,
+});
+
+// ---------- geometry helpers ----------
+// Scale x/z so the widest horizontal extent equals `d` metres.
+function fitDiameter(geo, d) {
+  geo.computeBoundingBox();
+  const s = geo.boundingBox.getSize(new THREE.Vector3());
+  const k = d / Math.max(s.x, s.z);
+  geo.scale(k, 1, k);
+}
+
+// Deterministic jitter keyed by position, so shared/seam vertices move together.
+function jitter(geo, amt) {
+  const p = geo.attributes.position;
+  const h = (x, y, z, o) => {
+    const s = Math.sin(Math.round(x * 1e4) * 12.9898 + Math.round(y * 1e4) * 78.233 + Math.round(z * 1e4) * 37.719 + o) * 43758.5453;
+    return (s - Math.floor(s)) - 0.5;
+  };
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+    p.setXYZ(i, x + h(x, y, z, 1) * amt, y + h(x, y, z, 2) * amt, z + h(x, y, z, 3) * amt);
+  }
+  geo.computeVertexNormals();
+}
+
+// Wobble the outline radially so round things look hand-made.
+function wobble(geo, amp) {
+  const p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), z = p.getZ(i), a = Math.atan2(z, x);
+    const f = 1 + amp * (Math.sin(3 * a + 1) * 0.6 + Math.sin(5 * a + 2) * 0.4);
+    p.setX(i, x * f);
+    p.setZ(i, z * f);
+  }
+}
+
+const lathe = (pts, segs) => new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), segs);
+
+const extrude = (shape, depth) => new THREE.ExtrudeGeometry(shape, {
+  depth, bevelEnabled: true, bevelThickness: 0.004, bevelSize: 0.004, bevelOffset: -0.004, bevelSegments: 1,
+});
+
+const poly = (pts) => {
+  const s = new THREE.Shape();
+  pts.forEach(([x, y], i) => (i ? s.lineTo(x, y) : s.moveTo(x, y)));
+  return s;
+};
+
+// ---------- interactive objects ----------
+// Every object is its own top-level mesh so it can be dragged and given a sound independently.
+const objects = [];
+
+function addObject(geo, color, name, position, yaw = 0, size = 1) {
+  const m = new THREE.Mesh(geo, paint(color));
+  m.castShadow = m.receiveShadow = true;
+  m.userData = {
+    name, audio: null, url: null, flashUntil: 0, anim: null,
+    // for gravity: points on the surface, and the orientation it settles into when it topples flat
+    samples: [], restQ: new THREE.Quaternion(), forward: new THREE.Vector3(0, 0, 1),
+  };
+  m.position.copy(position);
+  m.scale.setScalar(size);
+  m.rotation.y = yaw;
+  const sampler = new MeshSurfaceSampler(m).build();
+  const pts = m.userData.samples;
+  for (let i = 0; i < 350; i++) { const v = new THREE.Vector3(); sampler.sample(v); pts.push(v); }
+  const pos = geo.attributes.position, step = Math.max(1, Math.floor(pos.count / 150));   // plus the sharp corners/tips
+  for (let i = 0; i < pos.count; i += step) pts.push(new THREE.Vector3().fromBufferAttribute(pos, i));
+  scene.add(m);
+  objects.push(m);
+  return m;
+}
+
+// plate (red, Ø 110 cm at 1×)
+const PLATE_TOP = 0.015;
+{
+  const geo = lathe([
+    [0, PLATE_TOP], [0.40, PLATE_TOP], [0.46, 0.035], [0.50, 0.055], [0.54, 0.05], [0.55, 0.035],
+    [0.53, 0], [0, 0],
+  ], 24);
+  wobble(geo, 0.03);
+  fitDiameter(geo, 1.10);
+  jitter(geo, 0.004);
+  addObject(geo, COLORS.red, 'Plate', new THREE.Vector3(0, 0, 0), 0, T);
+}
+
+// bowl (blue, Ø 70 cm at 1×)
+const bowlPos = new THREE.Vector3(-0.06, PLATE_TOP, -0.05).multiplyScalar(T);   // sits on the plate floor
+{
+  const geo = lathe([[0, 0], [0.12, 0], [0.35, 0.30], [0.34, 0.30], [0.108, 0.012], [0, 0.012]], 10);
+  geo.rotateY(0.3);
+  fitDiameter(geo, 0.70);
+  jitter(geo, 0.006);
+  addObject(geo, COLORS.blue, 'Bowl', bowlPos, 0, T);
+}
+
+// cup (green, Ø 40 cm, octagonal)
+{
+  const geo = lathe([[0, 0], [0.14, 0], [0.20, 0.50], [0.185, 0.50], [0.125, 0.02], [0, 0.02]], 8);
+  geo.rotateY(0.2);
+  fitDiameter(geo, 0.40);
+  jitter(geo, 0.005);
+  addObject(geo, COLORS.green, 'Cup', new THREE.Vector3(-0.14, 0, -0.9), 0, T);
+}
+
+// cutlery (yellow, 100 cm) – shapes drawn in XY with y running 0 → 1 m, handle at y=0
+function flatCutleryGeometry(shape) {
+  const geo = extrude(shape, 0.014);
+  geo.rotateX(-Math.PI / 2);   // shape y → -z, thickness → up
+  geo.translate(0, 0, 0.5);    // centre along z
+  jitter(geo, 0.002);
+  return geo;
+}
+
+// fork (3 tines), tines pointing away from the viewer
+addObject(flatCutleryGeometry(poly([
+  [-0.03, 0], [0.03, 0], [0.03, 0.68], [0.055, 0.76], [0.055, 1.0], [0.025, 1.0], [0.025, 0.86],
+  [0.015, 0.86], [0.015, 1.0], [-0.015, 1.0], [-0.015, 0.86], [-0.025, 0.86], [-0.025, 1.0],
+  [-0.055, 1.0], [-0.055, 0.76], [-0.03, 0.68],
+])), COLORS.yellow, 'Fork', new THREE.Vector3(-0.88, 0.004, 0.0), -0.14);
+
+// knife with stepped shoulder and pointed blade
+addObject(flatCutleryGeometry(poly([
+  [-0.035, 0], [0.035, 0], [0.035, 0.55], [0.065, 0.60], [0.065, 0.88], [0.0, 1.0], [-0.035, 0.95],
+])), COLORS.yellow, 'Knife', new THREE.Vector3(0.9, 0.004, 0.03), 0.12);
+
+// spoon: long axis along +y from head tip, oriented to lean in the bowl and rest on its rim
+{
+  const s = new THREE.Shape();
+  s.moveTo(0, 0);
+  s.bezierCurveTo(0.10, 0.0, 0.11, 0.20, 0.05, 0.31);
+  s.lineTo(0.022, 0.42);
+  s.lineTo(0.032, 1.0);
+  s.lineTo(-0.032, 1.0);
+  s.lineTo(-0.022, 0.42);
+  s.lineTo(-0.05, 0.31);
+  s.bezierCurveTo(-0.11, 0.20, -0.10, 0.0, 0, 0);
+
+  const geo = extrude(s, 0.014);
+  geo.translate(0, -0.5, -0.007);   // pivot at the middle of the spoon
+  // dish the head so the top face is concave
+  const p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i);
+    const r2 = (x / 0.095) ** 2 + ((y - 0.16) / 0.17) ** 2;
+    if (y < 0.34 && r2 < 1) p.setZ(i, p.getZ(i) - 0.015 * (1 - r2));
+  }
+  geo.computeVertexNormals();
+
+  // head tip near the bowl floor, handle on the far-right rim (offsets relative to the bowl)
+  const tip = new THREE.Vector3(-0.07, 0.02, 0.07).multiplyScalar(T);
+  const rim = new THREE.Vector3(0.25, 0.312, -0.24).multiplyScalar(T);
+  const d = rim.clone().sub(tip).normalize();
+  const up = new THREE.Vector3(0, 1, 0);
+  const n = up.clone().addScaledVector(d, -up.dot(d)).normalize();
+  const xAxis = new THREE.Vector3().crossVectors(d, n);
+
+  const spoon = addObject(geo, COLORS.yellow, 'Spoon', bowlPos.clone().add(tip).addScaledVector(d, 0.5));
+  spoon.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, d, n));
+  spoon.userData.restQ.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2);   // lying flat: long axis → horizontal
+  spoon.userData.forward.set(0, 1, 0);
+}
+
+const UP = new THREE.Vector3(0, 1, 0);
+
+// ---------- gravity ----------
+// Only the underside of an object can rest on something. Surface points with some of the object's own
+// material directly beneath them (a bowl's inside, a plate's top) are dropped, so an object sitting
+// inside another (spoon in bowl) never counts as holding it up.
+function buildSupportPoints(o) {
+  const keepP = o.position.clone(), keepQ = o.quaternion.clone();
+  o.position.set(0, 0, 0);
+  o.quaternion.copy(o.userData.restQ);
+  o.updateMatrixWorld(true);
+  const rc = new THREE.Raycaster();
+  rc.ray.direction.set(0, -1, 0);
+  const w = new THREE.Vector3();
+  o.userData.samples = o.userData.samples.filter((pt) => {
+    w.copy(pt).applyMatrix4(o.matrixWorld);
+    rc.ray.origin.set(w.x, w.y - 0.0005, w.z);
+    return rc.intersectObject(o, false).length === 0;
+  });
+  o.position.copy(keepP);
+  o.quaternion.copy(keepQ);
+  o.updateMatrixWorld(true);
+}
+
+// Objects don't rotate-and-tumble; they fall straight down until the lowest surface point of any
+// part touches the floor or another object. Anything left unsupported by a large gap also topples flat.
+const BOUND = 4.5;          // objects stay within ±4.5 m of the centre (inside the 10 m grid)
+const MAX_HEIGHT = 2.5;     // highest an object can be lifted
+const GRAVITY = 9.8;
+const TOPPLE_GAP = 0.06;    // fall further than this and the object lands flat instead of keeping its tilt
+const caster = new THREE.Raycaster();
+const _pt = new THREE.Vector3();
+
+// How far `o` can move straight down before touching something. Rays start at the surface point itself, so objects resting ON `o`
+// are never mistaken for obstacles under it.
+function supportFall(o, stride = 1) {
+  o.updateMatrixWorld(true);
+  // cheap pre-check: only objects whose bounding box is above/below a point can matter
+  const others = objects.filter((x) => x !== o).map((b) => ({ b, box: new THREE.Box3().setFromObject(b).expandByScalar(0.005) }));
+  let fall = Infinity;
+  const pts = o.userData.samples;
+  for (let i = 0; i < pts.length; i += stride) {
+    _pt.copy(pts[i]).applyMatrix4(o.matrixWorld);
+    fall = Math.min(fall, _pt.y);   // the floor
+    for (const { b, box } of others) {
+      if (_pt.x < box.min.x || _pt.x > box.max.x || _pt.z < box.min.z || _pt.z > box.max.z) continue;
+      if (_pt.y < box.min.y - 1e-4) continue;   // b is entirely above this point
+      if (_pt.y <= box.max.y) {
+        // inside b? (odd number of surface crossings straight up). Overlap just blocks falling; it never pushes up.
+        caster.ray.origin.copy(_pt);
+        caster.ray.direction.set(0, 1, 0);
+        caster.far = 0.6;
+        if (caster.intersectObject(b, false).length % 2 === 1) { fall = Math.min(fall, 0); continue; }
+      } else if (_pt.y - box.max.y > fall) {
+        continue;   // b is further below than the best so far
+      }
+      // distance straight down to b's surface
+      caster.ray.origin.copy(_pt);
+      caster.ray.direction.set(0, -1, 0);
+      caster.far = Math.max(0, fall);   // only hits closer than the best so far matter
+      const down = caster.intersectObject(b, false)[0];
+      if (down) fall = Math.min(fall, down.distance);
+    }
+  }
+  return fall;
+}
+
+// orientation with the object's tilt removed (keeps its heading)
+function levelQuat(o) {
+  const { forward, restQ } = o.userData;
+  const h = forward.clone().applyQuaternion(o.quaternion);
+  h.y = 0;
+  if (h.lengthSq() < 0.01) return restQ.clone();
+  const base = forward.clone().applyQuaternion(restQ);
+  const yaw = Math.atan2(h.x, h.z) - Math.atan2(base.x, base.z);
+  return new THREE.Quaternion().setFromAxisAngle(UP, yaw).multiply(restQ);
+}
+
+const bottomY = (o) => new THREE.Box3().setFromObject(o).min.y;
+
+// Let every object drop onto whatever is under it (lowest first, so stacks settle bottom-up),
+// then animate each one from where it was to where it ended up.
+function settleAll() {
+  const start = new Map();
+  for (let pass = 0; pass < 6; pass++) {
+    let moved = false;
+    for (const o of [...objects].sort((a, b) => bottomY(a) - bottomY(b))) {
+      const p0 = o.position.clone(), q0 = o.quaternion.clone();
+      let fall = supportFall(o);
+      if (Math.abs(fall) < 0.002) continue;
+      if (fall > TOPPLE_GAP) {
+        o.quaternion.copy(levelQuat(o));
+        fall = supportFall(o);
+      }
+      if (!start.has(o)) start.set(o, { p0, q0 });
+      o.position.y -= fall;
+      o.updateMatrixWorld(true);
+      moved = true;
+    }
+    if (!moved) break;
+  }
+  const now = performance.now();
+  for (const [o, { p0, q0 }] of start) {
+    const p1 = o.position.clone(), q1 = o.quaternion.clone();
+    const drop = Math.max(0, p0.y - p1.y);
+    o.userData.anim = { p0, q0, p1, q1, t0: now, dur: Math.min(1, Math.max(0.15, Math.sqrt((2 * drop) / GRAVITY))), fell: drop > 0.005 };
+    o.position.copy(p0);
+    o.quaternion.copy(q0);
+  }
+}
+
+function stepFalls(now) {
+  for (const o of objects) {
+    const a = o.userData.anim;
+    if (!a) continue;
+    const u = Math.min(1, (now - a.t0) / 1000 / a.dur);
+    const e = a.fell ? u * u : u * u * (3 - 2 * u);   // accelerate like a falling object
+    o.position.lerpVectors(a.p0, a.p1, e);
+    o.quaternion.slerpQuaternions(a.q0, a.q1, u * u * (3 - 2 * u));
+    if (u >= 1) {
+      o.userData.anim = null;
+      updateContacts(o);   // landing on something counts as touching it
+    }
+  }
+}
+
+// ---------- contact detection: bringing two objects together plays both sounds ----------
+const touching = new Set();
+const obbOf = (o) => {
+  o.updateMatrixWorld(true);
+  o.geometry.boundingBox ?? o.geometry.computeBoundingBox();
+  return new OBB().fromBox3(o.geometry.boundingBox.clone().expandByScalar(0.01)).applyMatrix4(o.matrixWorld);
+};
+
+function updateContacts(moved, announce = true) {
+  const a = obbOf(moved);
+  for (const other of objects) {
+    if (other === moved) continue;
+    const key = [objects.indexOf(moved), objects.indexOf(other)].sort().join('-');
+    const hit = a.intersectsOBB(obbOf(other));
+    if (hit && !touching.has(key)) {
+      touching.add(key);
+      if (announce) for (const o of [moved, other]) if (o.userData.audio) triggerSound(o);
+    } else if (!hit) {
+      touching.delete(key);
+    }
+  }
+}
+// objects that start out touching (bowl on plate, spoon in bowl) shouldn't fire until separated and rejoined
+objects.forEach((o) => updateContacts(o, false));
+
+// ---------- person (neutral mannequin), scaled to 170 cm ----------
+const person = new THREE.Group();
+person.position.set(2.8, 0, 1.2);
+person.rotation.y = Math.atan2(-person.position.x, -person.position.z); // face the plate
+scene.add(person);
+
+new GLTFLoader().load(
+  PERSON_URL,
+  (gltf) => {
+    const model = gltf.scene;
+    const skin = new THREE.MeshStandardMaterial({ color: 0xb9bdc3, roughness: 0.7 });
+    model.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.material = skin; } });
+    const holder = new THREE.Group();
+    holder.add(model);
+    person.add(holder);
+
+    // normalise to exactly PERSON_HEIGHT with feet on the floor
+    holder.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(holder);
+    const k = PERSON_HEIGHT / (box.max.y - box.min.y);
+    holder.scale.setScalar(k);
+    holder.position.y = -box.min.y * k;
+  },
+  undefined,
+  (err) => { console.error('Person model failed to load', err); toast('Could not load the person model', 4000); }
+);
+
+// ---------- toast ----------
+const toastEl = document.getElementById('toast');
+let toastTimer = 0;
+function toast(msg, ms = 2600) {
+  toastEl.textContent = msg;
+  toastEl.style.opacity = 1;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastEl.style.opacity = 0; }, ms);
+}
+
+// ---------- sound: record (click or tap); objects play when brought together ----------
+const RECORD_MS = 1000;
+const FLASH_MS = 400;
+let micStream = null;
+let recordingObj = null;
+let epoch = 0;   // bumped on reset
+
+async function recordSound(obj) {
+  if (recordingObj) return;
+  recordingObj = obj;
+  const name = obj.userData.name;
+  try {
+    if (!navigator.mediaDevices?.getUserMedia) throw Object.assign(new Error('no mediaDevices'), { name: 'InsecureContext' });
+    micStream ??= await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    recordingObj = null;
+    console.error(err);
+    const inFrame = window.self !== window.top;
+    toast(
+      err.name === 'InsecureContext' ? 'Recording needs a secure (https) page' :
+      err.name === 'NotFoundError' ? 'No microphone found on this device' :
+      inFrame ? 'Microphone blocked. Allow it in the browser’s site settings, or open this model on its own page' :
+      'Microphone blocked. Allow it in the browser’s site settings, then try again', 6000);
+    return;
+  }
+  const myEpoch = epoch;
+  const rec = new MediaRecorder(micStream);
+  const chunks = [];
+  rec.ondataavailable = (e) => chunks.push(e.data);
+  rec.onstop = () => {
+    if (myEpoch !== epoch) return;   // scene was reset mid-recording
+    if (obj.userData.url) URL.revokeObjectURL(obj.userData.url);   // re-recording replaces the old sound
+    obj.userData.url = URL.createObjectURL(new Blob(chunks, { type: rec.mimeType }));
+    obj.userData.audio = new Audio(obj.userData.url);
+    recordingObj = null;
+    toast(`${name}: sound saved – bring it against another object to play`);
+  };
+  rec.start();
+  toast(`● Recording ${name}…`, RECORD_MS + 200);
+  setTimeout(() => rec.stop(), RECORD_MS);
+}
+
+function triggerSound(obj) {
+  obj.userData.audio.currentTime = 0;
+  obj.userData.audio.play();
+  obj.userData.flashUntil = performance.now() + FLASH_MS;
+}
+
+// ---------- pointer interaction: drag, click ----------
+const ray = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+const CLICK_SLOP = 5; // px of movement still counted as a click
+
+function pick(e) {
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(person.visible ? [...objects, person] : objects, true)[0];
+  if (!hit) return undefined;
+  let t = hit.object;                       // the person is a group of meshes: report the whole group
+  while (t && t !== person && !objects.includes(t)) t = t.parent;
+  return t ? { object: t, point: hit.point } : undefined;
+}
+
+let drag = null;
+// capture phase + controls.enabled=false keeps OrbitControls from also reacting
+canvas.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return;   // right/middle buttons stay with the camera
+  const hit = pick(e);
+  if (!hit) return;
+  controls.enabled = false;
+  const isPerson = hit.object === person;
+
+  const normal = new THREE.Vector3(0, 1, 0);          // normal drag slides along the floor plane
+  if (e.shiftKey) {                          // shift-drag slides on a vertical plane
+    camera.getWorldDirection(normal).setY(0);
+    if (normal.lengthSq() < 1e-6) normal.set(0, 0, 1);
+    normal.normalize();
+  }
+  drag = {
+    obj: hit.object, y: hit.object.position.y, targetY: hit.object.position.y, rotate: e.metaKey || e.altKey, lift: e.shiftKey && !isPerson, moved: false,
+    sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY,
+    plane: new THREE.Plane().setFromNormalAndCoplanarPoint(normal, hit.point),
+    offset: hit.point.clone().sub(hit.object.position),
+  };
+  if (!isPerson) hit.object.userData.anim = null;   // grabbing a falling object stops it
+  canvas.setPointerCapture(e.pointerId);
+}, true);
+
+canvas.addEventListener('pointermove', (e) => {
+  if (!drag) {
+    canvas.style.cursor = pick(e) ? 'grab' : 'default';
+    return;
+  }
+  if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < CLICK_SLOP) return;
+  drag.moved = true;
+  canvas.style.cursor = 'grabbing';
+
+  if (drag.rotate) {   // horizontal drag turns about the vertical axis, vertical drag tilts toward/away from the camera
+    const dx = e.clientX - drag.lx, dy = e.clientY - drag.ly;
+    drag.lx = e.clientX; drag.ly = e.clientY;
+    const side = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).setY(0).normalize();
+    drag.obj.rotateOnWorldAxis(UP, dx * 0.01);
+    if (drag.obj === person) return;   // the person only turns, never tilts
+    drag.obj.rotateOnWorldAxis(side, dy * 0.01);
+    updateContacts(drag.obj);
+    return;
+  }
+
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const p = new THREE.Vector3();
+  if (ray.ray.intersectPlane(drag.plane, p)) {
+    p.sub(drag.offset);
+    p.x = THREE.MathUtils.clamp(p.x, -BOUND, BOUND);   // the point under the cursor races off near the horizon
+    p.z = THREE.MathUtils.clamp(p.z, -BOUND, BOUND);
+    if (drag.lift) drag.y = THREE.MathUtils.clamp(p.y, 0, MAX_HEIGHT);
+    drag.obj.position.set(p.x, drag.y, p.z);
+    // where the object should rest here; the render loop eases its height toward that
+    if (drag.obj === person) return;   // stands on the floor; no gravity or sounds
+    if (!drag.lift) drag.targetY = drag.y - supportFall(drag.obj, 3);
+    updateContacts(drag.obj);
+  }
+});
+
+canvas.addEventListener('pointerup', (e) => {
+  if (!drag) return;
+  const { obj, moved, sx, sy } = drag;
+  drag = null;
+  controls.enabled = true;
+  canvas.releasePointerCapture(e.pointerId);
+  canvas.style.cursor = 'grab';
+  if (obj === person) return;   // nothing to play or record
+  if (moved) { settleAll(); return; }
+  if (Math.hypot(e.clientX - sx, e.clientY - sy) >= CLICK_SLOP) return;
+  recordSound(obj);   // a click records a new sound; bringing two objects together plays them
+});
+
+// scrolling over an object turns it instead of zooming the camera
+let wheelTimer = 0;
+canvas.addEventListener('wheel', (e) => {
+  const hit = pick(e);
+  if (!hit) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  hit.object.rotateOnWorldAxis(UP, -e.deltaY * 0.003);
+  if (hit.object === person) return;
+  hit.object.userData.anim = null;
+  updateContacts(hit.object);
+  clearTimeout(wheelTimer);
+  wheelTimer = setTimeout(settleAll, 250);
+}, { capture: true, passive: false });
+
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// ---------- reset ----------
+objects.forEach((o) => {
+  buildSupportPoints(o);
+  o.userData.home = { p: o.position.clone(), q: o.quaternion.clone() };
+});
+
+const personHome = { p: person.position.clone(), yaw: person.rotation.y };
+
+document.getElementById('reset').addEventListener('click', () => {
+  epoch++;                      // discards a recording that is still in progress
+  recordingObj = null;
+  drag = null;
+  controls.enabled = true;
+  for (const o of objects) {
+    const u = o.userData;
+    u.anim = null;
+    u.flashUntil = 0;
+    u.audio?.pause();
+    if (u.url) URL.revokeObjectURL(u.url);
+    u.audio = u.url = null;
+    o.position.copy(u.home.p);
+    o.quaternion.copy(u.home.q);
+    o.updateMatrixWorld(true);
+  }
+  person.position.copy(personHome.p);
+  person.rotation.y = personHome.yaw;
+  touching.clear();
+  objects.forEach((o) => updateContacts(o, false));
+  toast('Scene reset – all sounds removed');
+});
+
+// ---------- loop ----------
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+let lastT = performance.now();
+renderer.setAnimationLoop(() => {
+  const now = performance.now();
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  stepFalls(now);
+  if (drag && drag.moved && !drag.rotate && !drag.lift) {   // ease up/down instead of jumping
+    const y = drag.y + (drag.targetY - drag.y) * (1 - Math.exp(-dt * 14));
+    if (Math.abs(y - drag.y) > 1e-5) {
+      drag.y = y;
+      drag.obj.position.y = y;
+      updateContacts(drag.obj);
+    }
+  }
+  for (const o of objects) {
+    let k = 0;
+    if (recordingObj === o) k = 0.3 + 0.2 * Math.sin(now / 120);                    // pulse while recording
+    else if (o.userData.flashUntil > now) k = 0.45 * (o.userData.flashUntil - now) / FLASH_MS; // flash on playback
+    o.material.emissive.set(0xffffff);
+    o.material.emissiveIntensity = k;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>

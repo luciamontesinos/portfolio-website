@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tubularium – interactive model</title>
+  <link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+  <div id="loading">Loading…</div>
+  <details id="hud" open>
+    <summary>Controls</summary>
+    <div class="hud-body">
+      <div class="row" style="margin-top:0">
+        <span class="note">Mode</span>
+        <span class="seg" role="group" aria-label="Switch mode">
+          <button class="active" id="btn-structure">Melody</button>
+          <button id="btn-sequence">Chords</button>
+        </span>
+      </div>
+      <div class="row">
+        <span class="note">LEDs</span>
+        <span class="seg" role="group" aria-label="LEDs">
+          <button class="active" id="btn-leds-on">On</button>
+          <button id="btn-leds-off">Off</button>
+        </span>
+      </div>
+      <div class="light-row">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-label="dark"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+        <input type="range" id="light-slider" min="0" max="100" value="100" aria-label="Scene light, dark to bright">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-label="bright"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>
+      </div>
+      <hr>
+      <div class="help">
+        <h4>Playing</h4>
+        <dl class="keys"><dt>Click / tap / hold</dt><dd>a tube to play it</dd><dt>Mode</dt><dd>switches between melody and chords</dd><dt>LEDs</dt><dd>turn the lights on or off</dd><dt>Light</dt><dd>slide to the moon to darken the room</dd></dl>
+        <h4>Camera</h4>
+        <dl class="keys"><dt>Drag</dt><dd>to orbit</dd><dt>Scroll / pinch</dt><dd>to zoom</dd></dl>
+      </div>
+    </div>
+  </details>
+  <div id="note-display"></div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE           from 'three';
+    import { OBJLoader }        from 'three/addons/loaders/OBJLoader.js';
+    import { MTLLoader }        from 'three/addons/loaders/MTLLoader.js';
+    import { OrbitControls }    from 'three/addons/controls/OrbitControls.js';
+    import { EffectComposer }   from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass }       from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass }  from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { ShaderPass }       from 'three/addons/postprocessing/ShaderPass.js';
+    import { OutputPass }       from 'three/addons/postprocessing/OutputPass.js';
+    import { createStage, initHud, setupRenderer } from '../shared/stage.js';
+    import { FXAAShader }       from 'three/addons/shaders/FXAAShader.js';
+    import { RGBELoader }       from 'three/addons/loaders/RGBELoader.js';
+    import { mergeVertices }    from 'three/addons/utils/BufferGeometryUtils.js';
+
+    // ── CONFIG ────────────────────────────────────────────────────────────────
+    const OBJ_FILE = 'Tubularium1.obj';
+    const MTL_FILE = 'Tubularium1.mtl';
+
+    const PIPE_COLORS = [
+      new THREE.Color(0xff1a00),
+      new THREE.Color(0xff6600),
+      new THREE.Color(0xffdd00),
+      new THREE.Color(0x00ee44),
+      new THREE.Color(0x00ccff),
+      new THREE.Color(0x0033ff),
+      new THREE.Color(0xaa00ff),
+    ];
+
+    const LED_BASE_INTENSITY  = 0.8;
+    const LED_HOVER_INTENSITY = 5.5;
+    const CORE_MULTIPLIER     = 3.0;
+    const LERP_SPEED          = 0.07;
+
+    const BLOOM_STRENGTH  = 0.4;
+    const BLOOM_RADIUS    = 0.08;
+    const BLOOM_THRESHOLD = 1;
+
+    // Sequence mode visuals
+    const C_SEQ_NORMAL      = new THREE.Color(0x44aaff);
+    const C_SEQ_ACTIVE      = new THREE.Color(0xff44aa);
+    const C_SEQ_HOVER       = new THREE.Color(0x0033ee);
+    const SEQUENCE          = [0, 4, 5, 3];   // I  V  vi  IV  (C  G  Am  F)
+    const SEQ_ADVANCE_DELAY = 500;
+
+    // ── ZONE / NOTE MAPPING ───────────────────────────────────────────────────
+    // Structure mode — single notes, C Major, zone 0=top(oct4) 1=mid(oct3) 2=bot(oct2)
+    const MIDI_NOTES = [
+      [60, 48, 36], // pipe 0: C
+      [62, 50, 38], // pipe 1: D
+      [64, 52, 40], // pipe 2: E
+      [65, 53, 41], // pipe 3: F
+      [67, 55, 43], // pipe 4: G
+      [69, 57, 45], // pipe 5: A
+      [71, 59, 47], // pipe 6: B
+    ];
+    const NOTE_NAMES  = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+    const ZONE_OCTAVE = [4, 3, 2];
+    const ZONE_LABEL  = ['top', 'mid', 'bot'];
+    const ZONE_INTENS = [1.5, 1.0, 0.65];
+
+    // Sequence mode — chords (I–vii° in C Major)
+    const CHORD_INTERVALS = [
+      [0, 4, 7],  // I    C major
+      [0, 3, 7],  // ii   D minor
+      [0, 3, 7],  // iii  E minor
+      [0, 4, 7],  // IV   F major
+      [0, 4, 7],  // V    G major
+      [0, 3, 7],  // vi   A minor
+      [0, 3, 6],  // vii° B diminished
+    ];
+    const CHORD_NAMES = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'];
+
+    function getChordNotes(pipeIdx, zone) {
+      const root = MIDI_NOTES[pipeIdx][zone];
+      return CHORD_INTERVALS[pipeIdx].map(i => root + i);
+    }
+
+    // ── APP STATE (declared early — used by applyLightLevel below) ────────────
+    let appMode         = 'structure';
+    let seqStep         = 0;
+    let seqAdvanceTimer = null;
+    let ledsOn          = true;
+
+    // ── RENDERER ──────────────────────────────────────────────────────────────
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    setupRenderer(renderer);
+    // Neutral tone mapping keeps the shared warm-grey backdrop the same colour as in the other models
+    renderer.toneMapping         = THREE.NeutralToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    document.body.appendChild(renderer.domElement);
+
+    // ── SCENE / CAMERA ────────────────────────────────────────────────────────
+    const scene = new THREE.Scene();
+    // Same backdrop, floor and grid as the other models; the light slider fades them to night.
+    // (Tubularium keeps its own lights, so the shared sun/sky rig is switched off.)
+    const stage = createStage(scene, { unit: 1, lights: false });
+    initHud();
+    scene.environmentIntensity = 1.0;
+
+    // HDRI environment — loaded async, sets scene.environment for PBR reflections
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+    new RGBELoader().load(
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr',
+      (hdrTexture) => {
+        const envMap = pmremGenerator.fromEquirectangular(hdrTexture).texture;
+        scene.environment = envMap;
+        hdrTexture.dispose();
+        pmremGenerator.dispose();
+      },
+      undefined,
+      (err) => console.warn('HDRI failed to load — scene will render without environment reflections.', err)
+    );
+
+    const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.001, 500);
+    camera.position.set(0, 1, 1);
+
+    // ── LIGHTS ────────────────────────────────────────────────────────────────
+    // Sky/ground gradient ambient — warm top, cool bottom
+    const ambientLight = new THREE.HemisphereLight(0xfff4e0, 0x1a1a2e, 0.6);
+    scene.add(ambientLight);
+
+    // Key — warm studio tungsten, upper front-right, casts shadows
+    const keyLight = new THREE.DirectionalLight(0xfff5e8, 1.1);
+    keyLight.position.set(4, 8, 5);
+    keyLight.castShadow              = true;
+    keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.camera.near      = 1;
+    keyLight.shadow.camera.far       = 60;
+    keyLight.shadow.camera.left      = -15;
+    keyLight.shadow.camera.right     = 15;
+    keyLight.shadow.camera.top       = 15;
+    keyLight.shadow.camera.bottom    = -15;
+    keyLight.shadow.bias             = -0.0005;
+    scene.add(keyLight);
+
+    // Fill — cool daylight, front-left, softer than key
+    const fillLight = new THREE.DirectionalLight(0xd0e8ff, 0.35);
+    fillLight.position.set(-5, 3, 3);
+    scene.add(fillLight);
+
+    // Rim — deep electric blue, high behind, makes metals and acrylic pop
+    const rimLight = new THREE.DirectionalLight(0x3366ff, 0.9);
+    rimLight.position.set(-3, 5, -6);
+    scene.add(rimLight);
+
+    // Bounce — warm amber from below, simulates floor reflection
+    const bounceLight = new THREE.DirectionalLight(0xff9933, 0.12);
+    bounceLight.position.set(0, -4, 2);
+    scene.add(bounceLight);
+
+    // ── LIGHT SLIDER ─────────────────────────────────────────────────────────
+    // 100 = the same bright, warm-grey space as the other models; 0 = dark room, where the LEDs read best.
+    const lightSlider = document.getElementById('light-slider');
+
+    // Base intensities — kept low because HDRI already provides ambient fill
+    const LIGHT_BASE = {
+      ambient: 0.18, key: 0.55, fill: 0.10, rim: 0.35, bounce: 0.04, env: 0.6
+    };
+
+    function applyLightLevel(v) {  // v = 0..1
+      const s = 0.1 + v * 1.5;  // scale: 0.1 at 0, 1.6 at max
+      ambientLight.intensity     = LIGHT_BASE.ambient * s;
+      keyLight.intensity         = LIGHT_BASE.key     * s;
+      fillLight.intensity        = LIGHT_BASE.fill    * s;
+      rimLight.intensity         = LIGHT_BASE.rim     * s;
+      bounceLight.intensity      = LIGHT_BASE.bounce  * s;
+      scene.environmentIntensity = LIGHT_BASE.env     * (0.3 + v * 0.9);
+      stage.setDarkness(1 - v);
+    }
+
+    lightSlider.addEventListener('input', () => applyLightLevel(lightSlider.value / 100));
+    applyLightLevel(lightSlider.value / 100);
+
+    // ── ORBIT CONTROLS ────────────────────────────────────────────────────────
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+
+    // ── SELECTIVE BLOOM ───────────────────────────────────────────────────────
+    const BLOOM_SCENE = 1;
+    const bloomLayer  = new THREE.Layers();
+    bloomLayer.set(BLOOM_SCENE);
+
+    const bloomComposer = new EffectComposer(renderer);
+    bloomComposer.renderToScreen = false;
+    bloomComposer.addPass(new RenderPass(scene, camera));
+    bloomComposer.addPass(new UnrealBloomPass(
+      new THREE.Vector2(innerWidth, innerHeight),
+      BLOOM_STRENGTH, BLOOM_RADIUS, BLOOM_THRESHOLD
+    ));
+
+    const maskTarget = new THREE.WebGLRenderTarget(innerWidth, innerHeight);
+
+    const mixPass = new ShaderPass(
+      new THREE.ShaderMaterial({
+        uniforms: {
+          baseTexture:  { value: null },
+          bloomTexture: { value: bloomComposer.renderTarget2.texture },
+          maskTexture:  { value: maskTarget.texture },
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }`,
+        fragmentShader: `
+          uniform sampler2D baseTexture;
+          uniform sampler2D bloomTexture;
+          uniform sampler2D maskTexture;
+          varying vec2 vUv;
+          void main() {
+            float mask = texture2D(maskTexture, vUv).r;
+            gl_FragColor = texture2D(baseTexture, vUv)
+                         + texture2D(bloomTexture, vUv) * (1.0 - mask);
+          }`,
+      }),
+      'baseTexture'
+    );
+    mixPass.needsSwap = true;
+
+    const finalComposer = new EffectComposer(renderer);
+    finalComposer.addPass(new RenderPass(scene, camera));
+    finalComposer.addPass(mixPass);
+    finalComposer.addPass(new OutputPass());
+
+    const fxaaPass = new ShaderPass(FXAAShader);
+    const _pr = renderer.getPixelRatio();
+    fxaaPass.material.uniforms['resolution'].value.set(
+      1 / (innerWidth  * _pr),
+      1 / (innerHeight * _pr)
+    );
+    finalComposer.addPass(fxaaPass);
+
+    const savedMats = {};
+    const darkMat   = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const whiteMat  = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+    function darkenNonBloomed(obj) {
+      if (!obj.isMesh || bloomLayer.test(obj.layers)) return;
+      savedMats[obj.uuid] = obj.material;
+      obj.material = darkMat;
+    }
+    function restoreMaterial(obj) {
+      if (!obj.isMesh || !savedMats[obj.uuid]) return;
+      obj.material = savedMats[obj.uuid];
+      delete savedMats[obj.uuid];
+    }
+
+    const maskSaved = {};
+    function renderMask() {
+      scene.traverse(obj => {
+        if (!obj.isMesh) return;
+        maskSaved[obj.uuid] = obj.material;
+        obj.material = bloomLayer.test(obj.layers) ? darkMat : whiteMat;
+      });
+      renderer.setRenderTarget(maskTarget);
+      renderer.render(scene, camera);
+      renderer.setRenderTarget(null);
+      scene.traverse(obj => {
+        if (!maskSaved[obj.uuid]) return;
+        obj.material = maskSaved[obj.uuid];
+        delete maskSaved[obj.uuid];
+      });
+    }
+
+    // ── MATERIAL FACTORIES ────────────────────────────────────────────────────
+    function makePipeMaterial(col) {
+      return new THREE.MeshStandardMaterial({
+        color:             new THREE.Color(0xfafafa),
+        emissive:          col.clone(),
+        emissiveIntensity: LED_BASE_INTENSITY,
+        roughness:         0.88,
+        metalness:         0.0,
+        envMapIntensity:   0,   // frosted acrylic — HDRI doesn't reflect off it
+        side:              THREE.FrontSide,
+        polygonOffset:     true,
+        polygonOffsetFactor: 2,
+        polygonOffsetUnits:  2,
+      });
+    }
+
+    function makeCoreMaterial(col) {
+      return new THREE.MeshStandardMaterial({
+        color:             new THREE.Color(0x000000),
+        emissive:          col.clone(),
+        emissiveIntensity: LED_BASE_INTENSITY * CORE_MULTIPLIER,
+        roughness:         0.0,
+        metalness:         0.0,
+      });
+    }
+
+    function makeMetalMaterial(origMat) {
+      const n = origMat?.name ?? '';
+      if (n.includes('Polished'))
+        return new THREE.MeshStandardMaterial({ color: 0x999aaa, roughness: 0.08, metalness: 0.92 });
+      if (n.includes('Anodized'))
+        return new THREE.MeshStandardMaterial({ color: 0x555562, roughness: 0.28, metalness: 0.85 });
+      if (n.includes('Steel') || n.includes('Satin'))
+        return new THREE.MeshStandardMaterial({ color: 0x666674, roughness: 0.38, metalness: 0.80 });
+      if (n.includes('Tough_2000'))
+        return new THREE.MeshStandardMaterial({ color: 0x909090, roughness: 0.55, metalness: 0.0 });
+      return new THREE.MeshStandardMaterial({ color: 0x2a2a30, roughness: 0.55, metalness: 0.70 });
+    }
+
+    // ── LED CORE GEOMETRY ─────────────────────────────────────────────────────
+    function createLedCore(pipe, col) {
+      const box    = new THREE.Box3().setFromObject(pipe);
+      const size   = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+
+      const longest  = Math.max(size.x, size.y, size.z);
+      const shortest = Math.min(size.x, size.y, size.z);
+      const height   = longest  * 0.92;
+      const radius   = Math.max(shortest * 0.06, 0.0005);
+
+      const geo = new THREE.CylinderGeometry(radius, radius, height, 8);
+      if      (longest === size.x) geo.applyMatrix4(new THREE.Matrix4().makeRotationZ(Math.PI / 2));
+      else if (longest === size.z) geo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+
+      const core = new THREE.Mesh(geo, makeCoreMaterial(col));
+      core.position.copy(center);
+      core.userData.isLedCore        = true;
+      core.userData.targetColor      = col.clone();
+      core.userData.targetIntensity  = LED_BASE_INTENSITY * CORE_MULTIPLIER;
+      core.userData.currentIntensity = LED_BASE_INTENSITY * CORE_MULTIPLIER;
+      return core;
+    }
+
+    // ── MODEL LOADING ─────────────────────────────────────────────────────────
+    const ledPipes       = [];
+    const ledCores       = [];
+    const pipeZoneBounds = []; // pipeZoneBounds[i] = [lowY, highY] between zones
+
+    function onModelLoad(obj) {
+      const rawPipes      = [];
+      const rawConnectors = []; // Aluminum_-_Satin meshes = the 3 zone rings per tube
+
+      obj.traverse(node => {
+        if (!(node instanceof THREE.Mesh)) return;
+
+        // Smooth vertex normals: merge coincident verts → indexed geometry → average normals
+        node.geometry = mergeVertices(node.geometry, 1e-4);
+        node.geometry.computeVertexNormals();
+
+        node.castShadow    = true;
+        node.receiveShadow = true;
+
+        const matName = node.material?.name ?? '';
+        if (matName.includes('Translucent')) {
+          rawPipes.push(node);
+          node.userData.isLedPipe = true;
+        } else {
+          node.material = makeMetalMaterial(node.material);
+          if (matName === 'Aluminum_-_Satin' || matName.includes('Tough_2000')) {
+            rawConnectors.push(node);
+          }
+        }
+      });
+
+      obj.rotation.x = -Math.PI / 2;
+      obj.updateMatrixWorld(true);
+
+      const bbox    = new THREE.Box3().setFromObject(obj);
+      const bCenter = bbox.getCenter(new THREE.Vector3());
+      const bSize   = bbox.getSize(new THREE.Vector3());
+      obj.position.sub(bCenter);
+      scene.add(obj);
+      obj.updateMatrixWorld(true);
+
+      rawPipes.sort((a, b) => {
+        const ax = new THREE.Box3().setFromObject(a).getCenter(new THREE.Vector3()).x;
+        const bx = new THREE.Box3().setFromObject(b).getCenter(new THREE.Vector3()).x;
+        return ax - bx;
+      });
+
+      // Precompute connector world bboxes (after transform + centering)
+      const connData = rawConnectors.map(c => {
+        const b = new THREE.Box3().setFromObject(c);
+        return { cx: b.getCenter(new THREE.Vector3()).x, bbox: b };
+      });
+
+      rawPipes.forEach((pipe, i) => {
+        const col = PIPE_COLORS[i];
+        pipe.material = makePipeMaterial(col);
+        pipe.userData.pipeIndex        = i;
+        pipe.userData.targetColor      = col.clone();
+        pipe.userData.targetIntensity  = LED_BASE_INTENSITY;
+        pipe.userData.currentIntensity = LED_BASE_INTENSITY;
+        pipe.layers.enable(BLOOM_SCENE);
+        ledPipes.push(pipe);
+
+        const core = createLedCore(pipe, col);
+        core.userData.pipeIndex = i;
+        core.layers.enable(BLOOM_SCENE);
+        ledCores.push(core);
+        scene.add(core);
+
+        const pipeBBox = new THREE.Box3().setFromObject(pipe);
+        const pipeCX   = pipeBBox.getCenter(new THREE.Vector3()).x;
+
+        // Find this tube's 3 zone connector rings by X proximity (tubes are 10 units apart)
+        const myConns = connData
+          .filter(c => Math.abs(c.cx - pipeCX) < 4)
+          .sort((a, b) => a.bbox.getCenter(new THREE.Vector3()).y
+                        - b.bbox.getCenter(new THREE.Vector3()).y);
+
+        if (myConns.length >= 3) {
+          // Use midpoints between adjacent connector extents as zone boundaries
+          const b0 = myConns[0].bbox; // bottom zone ring
+          const b1 = myConns[1].bbox; // middle zone ring
+          const b2 = myConns[2].bbox; // top zone ring
+          pipeZoneBounds.push([
+            (b0.max.y + b1.min.y) / 2, // boundary between bottom and middle
+            (b1.max.y + b2.min.y) / 2, // boundary between middle and top
+          ]);
+        } else {
+          // Fallback: equal thirds of the tube height
+          const h = pipeBBox.max.y - pipeBBox.min.y;
+          pipeZoneBounds.push([
+            pipeBBox.min.y + h / 3,
+            pipeBBox.min.y + h * 2 / 3,
+          ]);
+          console.warn(`Tube ${i}: found ${myConns.length} connectors, using equal thirds fallback`);
+        }
+      });
+
+      const maxDim = Math.max(bSize.x, bSize.y, bSize.z);
+
+      // the model floats at the origin; put the shared floor + grid just beneath it, scaled to its size
+      const floorY = bbox.min.y - bCenter.y - maxDim * 0.01;
+      stage.group.position.y = floorY;
+      stage.group.scale.setScalar(maxDim * 0.3);   // grid of 10 squares, 3× the model wide
+      camera.near = maxDim * 0.002; camera.far = maxDim * 25; camera.updateProjectionMatrix();
+      const sh = keyLight.shadow.camera, ext = maxDim * 1.2;
+      keyLight.position.set(0.4, 0.8, 0.5).multiplyScalar(maxDim * 2);
+      Object.assign(sh, { left: -ext, right: ext, top: ext, bottom: -ext, near: maxDim * 0.2, far: maxDim * 6 });
+      sh.updateProjectionMatrix();
+
+      camera.position.set(0, maxDim * 0.3, maxDim * 2.0);
+      controls.minDistance = maxDim * 0.15;
+      controls.maxDistance = maxDim * 10;
+      controls.update();
+
+      document.getElementById('loading').style.display = 'none';
+      console.info(`Tubularium — ${ledPipes.length} pipes, zone bounds:`, pipeZoneBounds);
+    }
+
+    function onProgress(e) {
+      if (e.lengthComputable)
+        document.getElementById('loading').textContent =
+          `Loading… ${Math.round(e.loaded / e.total * 100)}%`;
+    }
+    function onError(err) {
+      console.error(err);
+      document.getElementById('loading').textContent = 'Error loading model — check console.';
+    }
+
+    new MTLLoader().load(
+      MTL_FILE,
+      (mats) => { mats.preload(); const o = new OBJLoader(); o.setMaterials(mats); o.load(OBJ_FILE, onModelLoad, onProgress, onError); },
+      undefined,
+      () => new OBJLoader().load(OBJ_FILE, onModelLoad, onProgress, onError)
+    );
+
+    // ── LERP HELPERS ──────────────────────────────────────────────────────────
+    function setTarget(mesh, col, intensity) {
+      if (!mesh) return;
+      if (!mesh.userData.targetColor) mesh.userData.targetColor = col.clone();
+      else mesh.userData.targetColor.copy(col);
+      mesh.userData.targetIntensity = intensity;
+    }
+
+    function lerpMesh(mesh) {
+      if (!mesh?.material) return;
+      mesh.userData.currentIntensity +=
+        (mesh.userData.targetIntensity - mesh.userData.currentIntensity) * LERP_SPEED;
+      mesh.material.emissiveIntensity = mesh.userData.currentIntensity;
+      if (mesh.userData.targetColor)
+        mesh.material.emissive.lerp(mesh.userData.targetColor, LERP_SPEED);
+    }
+
+    // ── ZONE DETECTION (uses actual connector ring positions from model) ───────
+    function getZone(point, pipeIdx) {
+      const bounds = pipeZoneBounds[pipeIdx];
+      if (!bounds) return 1;
+      if (point.y > bounds[1]) return 0; // top zone
+      if (point.y > bounds[0]) return 1; // middle zone
+      return 2;                           // bottom zone
+    }
+
+    // ── NOTE DISPLAY ──────────────────────────────────────────────────────────
+    const noteDisplay = document.getElementById('note-display');
+    function showNoteLabel(pipeIdx, zone) {
+      if (appMode === 'structure') {
+        noteDisplay.textContent =
+          `${NOTE_NAMES[pipeIdx]}${ZONE_OCTAVE[zone]}  ·  ${ZONE_LABEL[zone]}`;
+      } else {
+        noteDisplay.textContent = `${CHORD_NAMES[pipeIdx]}  ·  ${ZONE_LABEL[zone]}`;
+      }
+      noteDisplay.classList.add('on');
+    }
+    function hideNoteLabel() { noteDisplay.classList.remove('on'); }
+
+    // ── AUDIO SYSTEM ──────────────────────────────────────────────────────────
+    let audioCtx   = null;
+    let reverbNode = null;
+    let masterGain = null;
+    const activeNotes = new Map();
+
+    function initAudio() {
+      if (audioCtx) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return;
+      }
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.65;
+      masterGain.connect(audioCtx.destination);
+
+      reverbNode = audioCtx.createConvolver();
+      const rate = audioCtx.sampleRate;
+      const len  = Math.floor(rate * 2.5);
+      const ir   = audioCtx.createBuffer(2, len, rate);
+      for (let c = 0; c < 2; c++) {
+        const d = ir.getChannelData(c);
+        for (let i = 0; i < len; i++)
+          d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.2);
+      }
+      reverbNode.buffer = ir;
+
+      const rvGain = audioCtx.createGain();
+      rvGain.gain.value = 0.38;
+      reverbNode.connect(rvGain);
+      rvGain.connect(masterGain);
+    }
+
+    function playPad(midiNotes, velocity, key) {
+      if (!audioCtx) return;
+      const existing = activeNotes.get(key);
+      if (existing) releasePad(existing);
+
+      const notes = Array.isArray(midiNotes) ? midiNotes : [midiNotes];
+      const vol   = (velocity / 127) * 0.42 / Math.sqrt(notes.length);
+      const t     = audioCtx.currentTime;
+      const allOscs  = [];
+      const allGains = [];
+
+      for (const midi of notes) {
+        const freq = 440 * Math.pow(2, (midi - 69) / 12);
+        const o1 = audioCtx.createOscillator();
+        const o2 = audioCtx.createOscillator();
+        o1.type = o2.type = 'sine';
+        o1.frequency.value = freq;
+        o2.frequency.value = freq * 1.003;
+
+        const filt = audioCtx.createBiquadFilter();
+        filt.type = 'lowpass';
+        filt.frequency.value = Math.min(freq * 5, 7000);
+        filt.Q.value = 0.85;
+
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(0.001, t);
+        g.gain.exponentialRampToValueAtTime(vol, t + 0.28);
+
+        o1.connect(filt); o2.connect(filt); filt.connect(g);
+        g.connect(masterGain); g.connect(reverbNode);
+        o1.start(t); o2.start(t);
+        allOscs.push(o1, o2); allGains.push(g);
+      }
+
+      activeNotes.set(key, { oscillators: allOscs, gainNodes: allGains, targetVol: vol });
+    }
+
+    function releasePad(noteObj) {
+      if (!noteObj || !audioCtx) return;
+      const t = audioCtx.currentTime;
+      for (const g of noteObj.gainNodes) {
+        const cur = Math.max(g.gain.value, 0.0001); // snapshot current level (handles mid-attack release)
+        g.gain.cancelScheduledValues(t);
+        g.gain.setValueAtTime(cur, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+      }
+      setTimeout(() => noteObj.oscillators.forEach(o => { try { o.stop(); } catch(e){} }), 400);
+    }
+
+    // ── CLICK / NOTE TRIGGERING ───────────────────────────────────────────────
+    let pressedKey     = null;
+    let pressedPipeVis = null;
+
+    renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());   // no long-press menu on touch
+    renderer.domElement.addEventListener('pointerdown', e => {
+      if (!ledPipes.length || e.button > 0) return;
+      setPointerFrom(e);   // touch has no hover, so aim at the tap itself
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObjects(ledPipes, false);
+      if (!hits.length) return;
+
+      const pi   = hits[0].object.userData.pipeIndex;
+      const zone = getZone(hits[0].point, pi);
+
+      initAudio();
+
+      if (appMode === 'structure') {
+        pressedKey = `s-${pi}-${zone}`;
+        playPad(MIDI_NOTES[pi][zone], 100, pressedKey);
+      } else {
+        pressedKey = `q-${pi}-${zone}`;
+        playPad(getChordNotes(pi, zone), 100, pressedKey);
+      }
+
+      pressedPipeVis = { pi, zone };
+
+      if (ledsOn) {
+        // chords mode: a touched pipe glows dark blue all over; melody mode keeps the pipe's own colour
+        const col = appMode === 'sequence' ? C_SEQ_HOVER : PIPE_COLORS[pi];
+        setTarget(ledPipes[pi], col, LED_HOVER_INTENSITY * 2.5);
+        setTarget(ledCores[pi], col, LED_HOVER_INTENSITY * CORE_MULTIPLIER * 2.5);
+      }
+    });
+
+    const releasePointer = () => {
+      if (!pressedKey) return;
+
+      const noteObj = activeNotes.get(pressedKey);
+      if (noteObj) { releasePad(noteObj); activeNotes.delete(pressedKey); }
+
+      if (pressedPipeVis && ledsOn) {
+        const { pi, zone } = pressedPipeVis;
+        if (hoveredIndex === pi && appMode === 'structure') {
+          const zm = ZONE_INTENS[hoveredZone];
+          setTarget(ledPipes[pi], PIPE_COLORS[pi], LED_HOVER_INTENSITY * zm);
+          setTarget(ledCores[pi], PIPE_COLORS[pi], LED_HOVER_INTENSITY * CORE_MULTIPLIER * zm);
+        } else if (hoveredIndex === pi && appMode === 'sequence') {
+          setTarget(ledPipes[pi], C_SEQ_HOVER, LED_HOVER_INTENSITY);
+          setTarget(ledCores[pi], C_SEQ_HOVER, LED_HOVER_INTENSITY * CORE_MULTIPLIER);
+        } else {
+          restoreToBase(pi);
+        }
+      }
+
+      pressedPipeVis = null;
+      pressedKey     = null;
+    };
+    window.addEventListener('pointerup', releasePointer);
+    window.addEventListener('pointercancel', releasePointer);
+
+    // ── HOVER ─────────────────────────────────────────────────────────────────
+    const raycaster = new THREE.Raycaster();
+    const pointer   = new THREE.Vector2(-9, -9);
+    let   hoveredIndex = -1;
+    let   hoveredZone  = 1;
+
+    function setPointerFrom(e) {
+      pointer.x =  (e.clientX / innerWidth)  * 2 - 1;
+      pointer.y = -(e.clientY / innerHeight) * 2 + 1;
+    }
+    addEventListener('pointermove', setPointerFrom);
+
+    function restoreToBase(idx) {
+      if (idx < 0) return;
+      const targetIntens = ledsOn ? LED_BASE_INTENSITY : 0;
+      if (appMode === 'structure') {
+        setTarget(ledPipes[idx], PIPE_COLORS[idx], targetIntens);
+        setTarget(ledCores[idx], PIPE_COLORS[idx], targetIntens * CORE_MULTIPLIER);
+      } else {
+        const col = idx === SEQUENCE[seqStep] ? C_SEQ_ACTIVE : C_SEQ_NORMAL;
+        setTarget(ledPipes[idx], col, targetIntens);
+        setTarget(ledCores[idx], col, targetIntens * CORE_MULTIPLIER);
+      }
+    }
+
+    function applyHover(idx, zone) {
+      if (idx < 0 || !ledsOn) return;
+      const zm = ZONE_INTENS[zone ?? 1];
+      if (appMode === 'structure') {
+        setTarget(ledPipes[idx], PIPE_COLORS[idx], LED_HOVER_INTENSITY * zm);
+        setTarget(ledCores[idx], PIPE_COLORS[idx], LED_HOVER_INTENSITY * CORE_MULTIPLIER * zm);
+      } else {
+        setTarget(ledPipes[idx], C_SEQ_HOVER, LED_HOVER_INTENSITY * zm);
+        setTarget(ledCores[idx], C_SEQ_HOVER, LED_HOVER_INTENSITY * CORE_MULTIPLIER * zm);
+        if (idx === SEQUENCE[seqStep]) {
+          seqAdvanceTimer = setTimeout(() => {
+            seqAdvanceTimer = null;
+            advanceSequence();
+          }, SEQ_ADVANCE_DELAY);
+        }
+      }
+    }
+
+    function updateHover() {
+      raycaster.setFromCamera(pointer, camera);
+      const hits    = raycaster.intersectObjects(ledPipes, false);
+      const newIdx  = hits.length > 0 ? hits[0].object.userData.pipeIndex : -1;
+      const newZone = (hits.length > 0 && newIdx >= 0) ? getZone(hits[0].point, newIdx) : 1;
+
+      const pipeChanged = newIdx  !== hoveredIndex;
+      const zoneChanged = newZone !== hoveredZone;
+
+      if (pipeChanged) {
+        if (hoveredIndex >= 0) {
+          restoreToBase(hoveredIndex);
+          if (seqAdvanceTimer !== null) { clearTimeout(seqAdvanceTimer); seqAdvanceTimer = null; }
+        }
+        hoveredIndex = newIdx;
+        hoveredZone  = newZone;
+        applyHover(newIdx, newZone);
+        document.body.style.cursor = newIdx >= 0 ? 'pointer' : 'default';
+        if (newIdx < 0) hideNoteLabel();
+      } else if (zoneChanged && newIdx >= 0 && appMode === 'structure') {
+        hoveredZone = newZone;
+        applyHover(newIdx, newZone);
+      }
+
+      if (newIdx >= 0) showNoteLabel(newIdx, hoveredZone);
+    }
+
+    // ── MODE SWITCHING ────────────────────────────────────────────────────────
+    function setMode(mode) {
+      if (mode === appMode) return;
+      appMode      = mode;
+      hoveredIndex = -1;
+      hoveredZone  = 1;
+      hideNoteLabel();
+      document.body.style.cursor = 'default';
+
+      if (seqAdvanceTimer !== null) { clearTimeout(seqAdvanceTimer); seqAdvanceTimer = null; }
+
+      document.getElementById('btn-structure').classList.toggle('active', mode === 'structure');
+      document.getElementById('btn-sequence').classList.toggle('active',  mode === 'sequence');
+
+      const baseIntens = ledsOn ? LED_BASE_INTENSITY : 0;
+
+      if (mode === 'structure') {
+        ledPipes.forEach((pipe, i) => {
+          setTarget(pipe,        PIPE_COLORS[i], baseIntens);
+          setTarget(ledCores[i], PIPE_COLORS[i], baseIntens * CORE_MULTIPLIER);
+        });
+      } else {
+        seqStep = 0;
+        const activeIdx = SEQUENCE[seqStep];
+        ledPipes.forEach((pipe, i) => {
+          const col = i === activeIdx ? C_SEQ_ACTIVE : C_SEQ_NORMAL;
+          setTarget(pipe,        col, baseIntens);
+          setTarget(ledCores[i], col, baseIntens * CORE_MULTIPLIER);
+        });
+      }
+    }
+
+    // ── LED TOGGLE ────────────────────────────────────────────────────────────
+    function toggleLeds() {
+      ledsOn = !ledsOn;
+      document.getElementById('btn-leds-on').classList.toggle('active', ledsOn);
+      document.getElementById('btn-leds-off').classList.toggle('active', !ledsOn);
+
+      if (!ledsOn) {
+        hoveredIndex = -1;
+        hideNoteLabel();
+        ledPipes.forEach((pipe, i) => {
+          setTarget(pipe,        PIPE_COLORS[i], 0);
+          setTarget(ledCores[i], PIPE_COLORS[i], 0);
+        });
+      } else {
+        const baseIntens = LED_BASE_INTENSITY;
+        if (appMode === 'structure') {
+          ledPipes.forEach((pipe, i) => {
+            setTarget(pipe,        PIPE_COLORS[i], baseIntens);
+            setTarget(ledCores[i], PIPE_COLORS[i], baseIntens * CORE_MULTIPLIER);
+          });
+        } else {
+          const activeIdx = SEQUENCE[seqStep];
+          ledPipes.forEach((pipe, i) => {
+            const col = i === activeIdx ? C_SEQ_ACTIVE : C_SEQ_NORMAL;
+            setTarget(pipe,        col, baseIntens);
+            setTarget(ledCores[i], col, baseIntens * CORE_MULTIPLIER);
+          });
+        }
+      }
+    }
+
+    // ── SEQUENCE ADVANCE ──────────────────────────────────────────────────────
+    function advanceSequence() {
+      seqStep = (seqStep + 1) % SEQUENCE.length;
+      const activeIdx  = SEQUENCE[seqStep];
+      const baseIntens = ledsOn ? LED_BASE_INTENSITY : 0;
+      ledPipes.forEach((pipe, i) => {
+        const col = i === activeIdx ? C_SEQ_ACTIVE : C_SEQ_NORMAL;
+        setTarget(pipe,        col, baseIntens);
+        setTarget(ledCores[i], col, baseIntens * CORE_MULTIPLIER);
+      });
+      if (hoveredIndex >= 0 && ledsOn) {
+        setTarget(ledPipes[hoveredIndex], C_SEQ_HOVER, LED_HOVER_INTENSITY);
+        setTarget(ledCores[hoveredIndex], C_SEQ_HOVER, LED_HOVER_INTENSITY * CORE_MULTIPLIER);
+      }
+    }
+
+    // ── RESIZE ────────────────────────────────────────────────────────────────
+    addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+      bloomComposer.setSize(innerWidth, innerHeight);
+      finalComposer.setSize(innerWidth, innerHeight);
+      maskTarget.setSize(innerWidth, innerHeight);
+      const pr = renderer.getPixelRatio();
+      fxaaPass.material.uniforms['resolution'].value.set(
+        1 / (innerWidth  * pr),
+        1 / (innerHeight * pr)
+      );
+    });
+
+    // ── BUTTON LISTENERS ──────────────────────────────────────────────────────
+    document.getElementById('btn-structure').addEventListener('click', () => setMode('structure'));
+    document.getElementById('btn-sequence').addEventListener('click',  () => setMode('sequence'));
+    document.getElementById('btn-leds-on').addEventListener('click',  () => { if (!ledsOn) toggleLeds(); });
+    document.getElementById('btn-leds-off').addEventListener('click', () => { if (ledsOn)  toggleLeds(); });
+
+    // ── RENDER LOOP ───────────────────────────────────────────────────────────
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      updateHover();
+      ledPipes.forEach(lerpMesh);
+      ledCores.forEach(lerpMesh);
+
+      // bloom + mask only care about the glowing pipes: leave out the backdrop and floor
+      const bg = scene.background;
+      scene.background = null;
+      stage.group.visible = false;
+
+      scene.traverse(darkenNonBloomed);
+      bloomComposer.render();
+      scene.traverse(restoreMaterial);
+
+      renderMask();
+
+      scene.background = bg;
+      stage.group.visible = true;
+      finalComposer.render();
+    }
+
+    animate();
+  </script>
+</body>
+</html>

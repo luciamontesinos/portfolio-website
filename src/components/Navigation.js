@@ -135,7 +135,7 @@ function Navigation() {
     <Navbar style={{ transform: isVisible ? "translateY(0)" : "translateY(-110%)", transition: "transform 0.3s ease-in-out" }}>
       <NameContainer>
         <h1>Lucía Montesinos</h1>
-        <h3>Creative Technologist | PhD Fellow</h3>
+        <h3>Creative Technologist | Interaction Designer  | PhD Fellow </h3>
       </NameContainer>
 
       <BurgerMenu onClick={toggleMenu} isMenuOpen={isMenuOpen}>

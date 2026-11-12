@@ -1,14 +1,18 @@
 import { createGlobalStyle } from "styled-components";
 
+export const ACCENT_COLOR = "#ff0000";
+
 export const darkTheme = {
   background: "#121212",
   color: "white",
   border: "white",
+  accent: ACCENT_COLOR,
 };
 export const lightTheme = {
   background: "white",
   color: "#121212",
   border: "#121212",
+  accent: ACCENT_COLOR,
 };
 
 export const GlobalStyle = createGlobalStyle`
@@ -63,11 +67,11 @@ export const GlobalStyle = createGlobalStyle`
   a {
     color: ${({ theme }) => theme.color};
     text-decoration: none;
-    text-shadow: 1px 1px 10px red;
+    text-shadow: 1px 1px 10px ${({ theme }) => theme.accent};
 
     transition: color 0.3s ease;
     &:hover {
-      color: red;
+      color: ${({ theme }) => theme.accent};
     }
   }
   nav {

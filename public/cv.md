@@ -1,5 +1,5 @@
 # Experience
-- PhD Fellow at IT University of Copenhagen, Denmark (May 2023 - currently)
+- PhD Fellow at IT University of Copenhagen, Denmark (May 2023 - Nov 2026)
 
 - Creative Technologist at Schibsted, Oslo, Norway (June - August 2023)
 
@@ -14,7 +14,7 @@
 - Ride Operator at Kings Dominion, Doswell, Virginia, USA (June - September 2018)
 
 # Education
-- PhD in Interaction Design, IT University of Copenhagen, Denmark (2023 - currently)
+- PhD in Interaction Design, IT University of Copenhagen, Denmark (2023 - 2026)
 
 - Visiting PhD, Auckland University of Technology, New Zealand (2025)
 
@@ -23,10 +23,10 @@
 - BSc in Software Engineering, Universidad de Tecnología y Arte Digital, Madrid, Spain (2016 - 2020)
 
 # Skills
-- Interaction Design ☉ Concept development ☉ Digital prototyping ☉ Physical computing ☉ Sound-based Design ☉ AI Based Applications ☉ Speculative Design ☉ App Development ☉ User Research
+- Interactive installations ☉ Tangible interaction ☉ Audiovisual interaction ☉ AI-based interaction ☉ Concept development ☉ UX/UI ☉ User journeys and personas ☉ Physical computing ☉ Creative coding ☉ Prototyping & fabrication ☉ Web & App development ☉ Agentic AI workflows ☉ User research & Testing ☉ Workshop facilitation ☉ Qualitative Analysis
 
-# Toolbox 
-- Max/MSP/Jitter ☉ Processing ☉ Python ☉ Arduino ☉ Figma ☉ Flutter ☉ js ☉ HTML/CSS  
+# Toolbox
+- Max/MSP ☉ TouchDesigner ☉ Arduino ☉ Raspberry Pi ☉ ESP32 ☉ Electronics ☉ Python ☉ JavaScript ☉ p5.js ☉ Three.js ☉ Figma ☉ Adobe CC ☉ Fusion360
 
 
 # Teaching & Workshops
@@ -56,7 +56,7 @@
 
 
 # Reviewing
-- Conferences: *NIME'26* *DRS'26*, *CHI'25*, *DIS'25*, *NIME'25*, *Creativity and Cognition '24*.
+- Conferences: *TEI'26*, *NIME'26*, *DRS'26*, *CHI'25*, *DIS'25*, *NIME'25*, *Creativity and Cognition '24*.
 
 - Journals: *Digital Creativity*.
 

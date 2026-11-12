@@ -134,34 +134,8 @@ const CardFront = styled(CardFace)`
 
 const CardBack = styled(CardFace)`
   transform: rotateY(180deg);
-  background-color: ${({ theme }) => theme.background === '#121212' ? '#1c1a17' : '#ffffff'};
-  color: ${({ theme }) => theme.color};
-
-  /* Tiled texture, built from the site's tile motif. A red-on-dark tile reads
-     best against the dark theme's near-black card back; red-on-light for the
-     light theme, so the tile's own background nearly matches the card. */
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background-image: url(${({ theme }) => theme.background === '#121212' ? '/tile6.png' : '/tile5.png'});
-    background-repeat: repeat;
-    background-size: 180px 180px;
-  }
-
-  /* Blur over the texture so the text on top stays legible, plus the card's edge frame */
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background: ${({ theme }) => theme.background === '#121212' ? 'rgba(28, 26, 23, 0.35)' : 'rgba(255, 255, 255, 0.4)'};
-    -webkit-backdrop-filter: blur(1.5px);
-    backdrop-filter: blur(1.5px);
-    box-shadow: inset 0 0 0 1.5px ${({ theme }) => theme.background === '#121212' ? 'rgba(255, 255, 255, 0.18)' : 'rgba(0, 0, 0, 0.15)'},
-      inset 0 0 0 8px ${({ theme }) => theme.background === '#121212' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)'};
-  }
+  background-color: ${({ theme }) => theme.accent};
+  color: white;
 `;
 
 const CardBackContent = styled.div`
@@ -190,7 +164,7 @@ const CardBackContent = styled.div`
 const CardSubtitle = styled.p`
   font-style: italic;
   font-size: 18px;
-  color: gray;
+  color: rgba(255, 255, 255, 0.8);
   margin: 0 0 15px 0;
 
   @media (max-width: 768px) {
@@ -219,60 +193,37 @@ const CardBackFooter = styled.div`
 
 const CardYear = styled.span`
   font-size: 18px;
-  color: gray;
+  color: rgba(255, 255, 255, 0.8);
 `;
 
 const CardArrowButton = styled.button`
   background: none;
   border: none;
   padding: 0;
-  color: ${({ theme }) => theme.color};
+  color: white;
   font-size: 26px;
   line-height: 1;
   cursor: pointer;
   transition: color 0.3s ease;
 
   &:hover {
-    color: red;
-  }
-`;
-
-const DragHint = styled.div`
-  position: absolute;
-  font-family: 'TerminalGrotesque', sans-serif;
-  bottom: 10
-  px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: red;
-  text-shadow: 1px 1px 10px red;
-  padding: 8px 14px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 20px;
-  z-index: 3000;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-
-  @media (max-width: 768px) {
-    display: none;
+    opacity: 0.7;
   }
 `;
 
 // How far each card sits from the container's center, and how much it tilts.
 const spreadLayout = [
-  { x: -230, y: -40, rotation: -9 },
-  { x: -70, y: 55, rotation: 6 },
-  { x: 90, y: -55, rotation: -6 },
-  { x: 230, y: 35, rotation: 9 },
+  { x: -340, y: -40, rotation: -9 },
+  { x: -170, y: 55, rotation: 6 },
+  { x: 0, y: -55, rotation: -4 },
+  { x: 170, y: 55, rotation: 7 },
+  { x: 340, y: -35, rotation: 9 },
 ];
 
 const CLICK_DRAG_THRESHOLD = 6; // px of movement before a press counts as a drag rather than a click
 
 function Home({ setExpandedProject }) {
-  // Left to right on desktop: Picnic, Tubularium, Kinetip, Conversational User Interface
+  // Left to right on desktop: Picnic, Tubularium, Kinetip, Conversational User Interface, Table Manners
   const highlights = [
     {
       image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/picnic4.png",
@@ -306,6 +257,14 @@ function Home({ setExpandedProject }) {
       description: "An AI assistant capable of engaging in conversations and document work embodied in an old Ericofon 700",
       year: 2023,
     },
+    {
+      image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/tablemanners0.png",
+      projectId: 13,
+      title: "Table Manners",
+      subtitle: "Musicking Artifact III",
+      description: "Table Manners is an interactive music experience that invites participants to engage in playful music-making by striking dinnerware and using their voices.",
+      year: 2026,
+    },
   ];
 
   const [cards, setCards] = useState(
@@ -325,7 +284,6 @@ function Home({ setExpandedProject }) {
 
   const containerRef = useRef(null);
   const dragState = useRef({ isDragging: false, cardId: null, offsetX: 0, offsetY: 0, startX: 0, startY: 0, moved: false });
-  const [isHovered, setIsHovered] = useState(false);
 
   const goToProject = (projectId) => {
     setExpandedProject(projectId);
@@ -441,12 +399,7 @@ function Home({ setExpandedProject }) {
     {/* Desktop: Flippable Cards */}
     <CoverflowContainer
       ref={containerRef}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      {isHovered && !dragState.current.isDragging && (
-        <DragHint>(CLICK TO FLIP · DRAG TO MOVE)</DragHint>
-      )}
       <CardStack>
         {cards.map((card) => (
           <DraggableCard

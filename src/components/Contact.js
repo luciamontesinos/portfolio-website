@@ -29,7 +29,7 @@ const SocialLinkRow = styled.div`
     text-decoration: none;
     transition: color 0.3s ease;
     &:hover {
-      color: red;
+      color: ${({ theme }) => theme.accent};
     }
   }
 `;
@@ -39,7 +39,7 @@ const SocialLink = styled.a`
   text-decoration: none;
   transition: color 0.3s ease;
   &:hover {
-    color: red;
+    color: ${({ theme }) => theme.accent};
   }
 `;
 
@@ -76,7 +76,7 @@ function Contact() {
             onMouseEnter={() => setHoveredCity(currentCity)}
             onMouseLeave={() => setHoveredCity(null)}
           >
-            <span style={{ color: hoveredCity === currentCity ? "red" : theme.color}}>
+            <span style={{ color: hoveredCity === currentCity ? theme.accent : theme.color}}>
               {currentCity.city}
             </span>
             {hoveredCity === currentCity && (
@@ -92,7 +92,7 @@ function Contact() {
             >
               <span
                 style={{
-                  color: hoveredCity === city ? "red" : theme.color,
+                  color: hoveredCity === city ? theme.accent : theme.color,
                   marginRight: "8px",
                 }}
               >

@@ -55,7 +55,7 @@ const CVRow = styled.div`
       position: absolute;
       left: -40px;
       top: -12px;
-      color: red;
+      color: ${({ theme }) => theme.accent};
       font-size: 40px;
     }
 
@@ -73,8 +73,8 @@ const DownloadButton = styled.button`
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   &:hover {
     background: transparent;
-    color: red;
-    border-color: red;
+    color: ${({ theme }) => theme.accent};
+    border-color: ${({ theme }) => theme.accent};
   }
 
   @media (max-width: 768px) {
@@ -117,8 +117,8 @@ function CV() {
 
   const handleDownloadCV = () => {
     const link = document.createElement('a');
-    link.href = '/CV_2026.pdf';
-    link.download = 'CV_2026.pdf';
+    link.href = '/CV_2026_11.pdf';
+    link.download = 'CV_2026_11.pdf';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

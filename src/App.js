@@ -10,6 +10,7 @@ import CV from "./components/CV";
 import Contact from "./components/Contact";
 import ScrollToTop from "./components/ScrollToTop";
 import AnimatedLogo from "./components/AnimatedLogo";
+import HalftoneBlob from "./components/HalftoneBlob";
 
 const ContentWrapper = styled.div`
   width: 100%;
@@ -43,8 +44,8 @@ const ThemeToggleButton = styled.button`
   align-items: center;
   justify-content: center;
   &:hover {
-    border-color: red;
-    color: red;
+    border-color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.accent};
   }
     @media (max-width: 768px) {
     bottom: 4px;
@@ -63,6 +64,7 @@ function App() {
   return (
     <ThemeProvider theme={themeObj}>
       <GlobalStyle />
+      <HalftoneBlob />
       <AnimatedLogo />
       <ContentWrapper>
         <Navigation/>

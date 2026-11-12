@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Picnic – interactive model</title>
+  <link rel="stylesheet" href="../shared/style.css" />
+  <style>
+    /* step-sequencer readout: one row per instrument, one cell per 16th note */
+    #seq { display: grid; gap: 2px; margin-top: 8px; }
+    .seq-row { display: grid; grid-template-columns: 4.6em 1fr; align-items: center; gap: 6px; }
+    .seq-name { font-size: 11px; opacity: .75; white-space: nowrap; }
+    .seq-cells { display: grid; grid-template-columns: repeat(16, 1fr); gap: 1px; }
+    .seq-cells i { height: 9px; border-radius: 1px; background: var(--panel-line); }
+    .seq-cells i:nth-child(4n+1) { background: rgba(0,0,0,.2); }
+    .seq-cells i.on { background: var(--accent); }
+    .seq-cells i.now { outline: 1px solid var(--panel-ink); outline-offset: 0; }
+    .seq-cells i.on.now { background: var(--panel-ink); }
+  </style>
+</head>
+<body>
+  <div id="loading">Loading picnic scene…</div>
+
+  <details id="hud" open>
+    <summary>Controls</summary>
+    <div class="hud-body">
+      <div id="seq"></div>
+      <div class="btns"><button id="resetBtn" hidden>Reset layout</button></div>
+      <hr>
+      <div class="help">
+        <h4>Playing</h4>
+        <dl class="keys"><dt>Click / tap</dt><dd>an object to add it to the loop</dd><dt>Click / tap</dt><dd>the glass to clear the loop</dd><dt>Drag</dt><dd>to move the objects</dd></dl>
+        <h4>Camera</h4>
+        <dl class="keys"><dt>Drag space</dt><dd>to orbit</dd><dt>Scroll / pinch</dt><dd>to zoom</dd></dl>
+      </div>
+    </div>
+  </details>
+  <div id="toast"></div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

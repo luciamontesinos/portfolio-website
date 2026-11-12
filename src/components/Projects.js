@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
 import "@splidejs/splide/css";
@@ -10,7 +10,7 @@ import { Section, SplideWrapper } from "../styles/shared";
 const tags = [...new Set(projectList.flatMap(p => p.tags))];
 
 // For sorting by importance
-const importanceOrder = { high: 3, medium: 2, low: 1 };
+const importanceOrder = { high: 4, highMedium: 3, medium: 2, low: 1 };
 
 const FilterContainer = styled.div`
   display: ${({ isVisible }) => (isVisible ? "flex" : "none")};
@@ -28,16 +28,16 @@ const FilterContainer = styled.div`
 const StyledFilterButton = styled.button`
   padding: 8px 16px;
   font-size: 14px;
-  color: ${({ isSelected, theme }) => (isSelected ? "red" : theme.color)};
-  background: transparent;
-  border: 1px solid ${({ isSelected, theme }) => (isSelected ? "red" : theme.color)};
+  color: ${({ isSelected, theme }) => (isSelected ? theme.accent : theme.color)};
+  background: ${({ theme }) => theme.background};
+  border: 1px solid ${({ isSelected, theme }) => (isSelected ? theme.accent : theme.color)};
   border-radius: 24px;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   &:hover {
-    background: transparent;
-    color: red;
-    border-color: red;
+    background: ${({ theme }) => theme.background};
+    color: ${({ theme }) => theme.accent};
+    border-color: ${({ theme }) => theme.accent};
   }
 
   span {
@@ -52,7 +52,7 @@ const SortFunnelButton = styled.button`
   padding: 8px 12px;
   font-size: 18px;
   color: ${({ theme }) => theme.color};
-  background: transparent;
+  background: ${({ theme }) => theme.background};
   border: 1.5px solid ${({ theme }) => theme.color};
   border-radius: 40%;
   cursor: pointer;
@@ -62,9 +62,9 @@ const SortFunnelButton = styled.button`
   position: relative;
   transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
   &:hover {
-    color: red;
-    border-color: red;
-    background: rgba(255, 0, 0, 0.07);
+    color: ${({ theme }) => theme.accent};
+    border-color: ${({ theme }) => theme.accent};
+    background: color-mix(in srgb, ${({ theme }) => theme.accent} 7%, ${({ theme }) => theme.background});
   }
 `;
 
@@ -84,9 +84,9 @@ const SortDropdown = styled.div`
 `;
 
 const SortDropdownOption = styled.button`
-  background: none;
+  background: ${({ theme }) => theme.background};
   border: none;
-  color: ${({ selected, theme }) => (selected ? 'red' : theme.color)};
+  color: ${({ selected, theme }) => (selected ? theme.accent : theme.color)};
   font-size: 16px;
   text-align: left;
   padding: 12px 18px;
@@ -94,12 +94,13 @@ const SortDropdownOption = styled.button`
   width: 100%;
   transition: background 0.2s ease, color 0.2s ease;
   &:hover {
-    background: rgba(255, 0, 0, 0.07);
-    color: red;
+    background: color-mix(in srgb, ${({ theme }) => theme.accent} 7%, ${({ theme }) => theme.background});
+    color: ${({ theme }) => theme.accent};
   }
 `;
 
 const StyledCard = styled.div`
+  scroll-margin-top: 80px;
   display: flex;
   flex-direction: column;
   border-bottom: 1px solid ${({ theme }) => theme.color};
@@ -144,7 +145,7 @@ const ListRow = styled.div`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: ${({ isexpanded, theme }) => (isexpanded ? "red" : theme.color)};
+    color: ${({ isexpanded, theme }) => (isexpanded ? theme.accent : theme.color)};
   }
 
   p {
@@ -152,7 +153,7 @@ const ListRow = styled.div`
     flex: 1;
     white-space: nowrap;
 
-     color: ${({ isexpanded, theme }) => (isexpanded ? "red" : theme.color)};
+     color: ${({ isexpanded, theme }) => (isexpanded ? theme.accent : theme.color)};
   }
      p1 {
     margin: 0 16px;
@@ -160,16 +161,79 @@ const ListRow = styled.div`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-     color: ${({ isexpanded, theme }) => (isexpanded ? "red" : theme.color)};
+     color: ${({ isexpanded, theme }) => (isexpanded ? theme.accent : theme.color)};
+  }
+`;
+
+const DemoButton = styled.a`
+  display: inline-block;
+  padding: 8px 20px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  text-decoration: none;
+  color: ${({ theme }) => theme.accent};
+  background: ${({ theme }) => theme.background};
+  border: 1px solid ${({ theme }) => theme.accent};
+  border-radius: 24px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  &:hover {
+    background: ${({ theme }) => theme.accent};
+    color: white;
   }
 `;
 
 const DropdownRow = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 28px 24px 24px;
   width: 100%;
   box-sizing: border-box;
+  border-radius: 12px;
+  background: ${({ theme }) => theme.background};
+  box-shadow: ${({ theme }) => theme.background === '#121212'
+      ? '0 10px 30px rgba(255, 255, 255, 0.06)'
+      : '0 10px 30px rgba(0, 0, 0, 0.12)'},
+    inset 0 0 0 1.5px ${({ theme }) => theme.background === '#121212' ? 'rgba(255, 255, 255, 0.18)' : 'rgba(0, 0, 0, 0.15)'};
+  animation: dropdownIn 0.25s ease-out;
+
+  @keyframes dropdownIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    padding: 28px 16px 16px;
+  }
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid ${({ theme }) => theme.color};
+  background: ${({ theme }) => theme.background};
+  color: ${({ theme }) => theme.color};
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: rotate(90deg);
+    color: ${({ theme }) => theme.accent};
+    border-color: ${({ theme }) => theme.accent};
+  }
 `;
 
 
@@ -261,7 +325,7 @@ const PreviewCloseButton = styled.button`
     z-index: 2002;
 
     &:hover {
-      color: red;
+      color: ${({ theme }) => theme.accent};
     }
   `;
 
@@ -292,6 +356,7 @@ const PreviewCounter = styled.div`
   `;
 
 function Projects({ expandedProject, setExpandedProject }) {
+  const theme = useTheme();
   const [selectedTags, setSelectedTags] = useState([]);
   const [projectContent, setProjectContent] = useState({}); // Store content of each project
   const [projectMedia, setProjectMedia] = useState({}); // Store media URLs for each project
@@ -322,6 +387,7 @@ function Projects({ expandedProject, setExpandedProject }) {
   "/images/recommender.mp4": "https://www.youtube.com/embed/Gi7HCa44ZLw",
   "/images/picnic.mp4": "https://www.youtube.com/embed/vzOZoCOCKr0?si=ia0198lEJOoc9JzN",
   "/images/kinetip.mp4": "https://www.youtube.com/embed/IDFvhmlaa_E",
+  "/images/TableManners.mp4": "https://www.youtube.com/embed/3qbhbNygd08",
 };
             let mediaUrls = [];
             if (mediaSection) {
@@ -372,6 +438,16 @@ function Projects({ expandedProject, setExpandedProject }) {
       return b.year - a.year;
     });
   }
+
+  // Scroll to the start of the card whenever a project is opened
+  useEffect(() => {
+    if (!expandedProject) return;
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`project-${expandedProject}`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [expandedProject]);
 
   const toggleExpand = (projectId) => {
     if (expandedProject === projectId) {
@@ -455,12 +531,12 @@ function Projects({ expandedProject, setExpandedProject }) {
         </StyledFilterButton>
       </FilterContainer>
       {filteredProjects.length === 0 ? (
-        <div style={{ color: 'red', fontSize: '22px', margin: '32px 0', textAlign: 'center' }}>
+        <div style={{ color: theme.accent, fontSize: '22px', margin: '32px 0', textAlign: 'center' }}>
           No projects found for the selected tag combination.
         </div>
       ) : (
         filteredProjects.map((project) => (
-          <StyledCard key={project.id}>
+          <StyledCard key={project.id} id={`project-${project.id}`}>
             <ListRow
               onClick={() => toggleExpand(project.id)}
               isexpanded={expandedProject === project.id}
@@ -491,9 +567,23 @@ function Projects({ expandedProject, setExpandedProject }) {
             </ListRow>
             {expandedProject === project.id && (
               <DropdownRow>
+                <CloseButton aria-label="Close project" onClick={() => toggleExpand(project.id)}>
+                  ×
+                </CloseButton>
                 <p>{project.description}</p>
                 <DetailsColumn>
-                  <ReactMarkdown>{projectContent[project.id]}</ReactMarkdown>
+                  <ReactMarkdown
+                    components={{
+                      a: ({ node, ...props }) =>
+                        props.href && props.href.startsWith("/models/") ? (
+                          <DemoButton {...props} target="_blank" rel="noopener noreferrer">{props.children}</DemoButton>
+                        ) : (
+                          <a {...props} target="_blank" rel="noopener noreferrer">{props.children}</a>
+                        ),
+                    }}
+                  >
+                    {projectContent[project.id]}
+                  </ReactMarkdown>
                   <MediaContainer>
                     {projectMedia[project.id] && projectMedia[project.id].length > 0 && (
                       <SplideWrapper>

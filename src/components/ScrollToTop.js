@@ -11,7 +11,7 @@ const ScrollToTopButton = styled.button`
   font-size: 40px;
   cursor: pointer;
   &:hover {
-    color: red;
+    color: ${({ theme }) => theme.accent};
   }
 
   @media (max-width: 768px) {

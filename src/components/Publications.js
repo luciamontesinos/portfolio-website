@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Section } from "../styles/shared";
 
 const PublicationsList = styled.div`
@@ -33,13 +33,14 @@ const PublicationsList = styled.div`
       position: absolute;
       left: -40px;
       top: -12px;
-      color: red;
+      color: ${({ theme }) => theme.accent};
       font-size: 40px;
     }
 
 `;
 
 function Publications() {
+  const theme = useTheme();
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -209,7 +210,7 @@ function Publications() {
                           href={`https://doi.org/${pub.doi}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: "red" }}
+                          style={{ color: theme.accent }}
                         >
                           {pub.doi}
                         </a>

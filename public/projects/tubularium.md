@@ -1,15 +1,13 @@
-Tubularium was the first exploration of my PhD project. Tubularium is a tangible music interface designed to support non-musicians in music making.
+[Demo](/models/tubularium/index.html)
 
-Tubularium was designed following a Research-through-Design methodology to enquire into how to design a human-sized tangible interface that could allow participants without any musical skills to make music, facilitate enough agency so that participants feel like they are making music, and overall provide an aesthetic experience.
-
-This resulted in a set of 7 acrylic pipes, each 110 centimeters tall, arranged in a line. Each of the pipes contains a LED light and is divided into three touch-sensing areas, corresponding to different octaves. These sensing areas are connected to a capacitive touch sensor that is then connected to a mapping software, which, based on the current configuration, triggers a determined sound.
-
-To interact with Tubularium, you simply touch the sensing areas and a note will trigger, followed with light feedback. Using a controller, participants can change the instrument sound, key, and emotion, and switch between a single-note mode for improvising melodies, and a chord mode where the lights guide you through a chord progression based on the emotion chosen.
-
-I designed and build every bit of Tubularium, from building the structure and the pipes, soldering the electronics, 3D printing, and all the software (and the many iterations that happened until reaching this version).
+Tubularium is the first artefact developed for my PhD, exploring melodic music-making. It is an interactive music system consisting of seven vertical acrylic tubes, each representing a note in a heptatonic scale, with three touch-sensitive zones per tube corresponding to different octaves. A separate controller lets people switch between melody and chord-progression modes, choose the instrument voice, key and scale, and access recording and AI-based improvisation features. Tubularium was designed to support melodic music-making across a range of musical skills, lowering the barrier for those with little or no musical knowledge while remaining open-ended for those with more experience.
 
 
-## Publications
+## Research
+Tubularium facilitates participatory music-making not only by providing a musical scaffolding for novices, but also by opening up the ways in which people can make music with it. Its material aesthetic and partial resemblance to familiar musical instruments signal that the tubes are musical and make them approachable, while an ambiguous interface leaves open how to play, so that different bodies can find their own way through it. The size of Tubularium draws the whole body into the interaction, and its features extend what participants can make while keeping the music their own.
+
+Thirty-two participants evaluated Tubularium, individually and in groups, in a public setting.
+
 
 There is one paper published about it, which you can [check it out here](https://zenodo.org/records/15699662). The paper presents the design and evaluation of Tubularium. The main findings are that that Tubularium successfully allowed non musicians to engage in music making, and for many it resulted in a an aesthetic experience. Moreover, we observed that the full-body scale of the interface mattered, and that it allowed participants to approach it and appropriate it in many different ways. 
 

@@ -7,21 +7,20 @@ export const projectList = [
   { id: 6, name: "PlantMe",  description: "A wellbeing app", tags: ["UX", "App Development", "2021"], file: "/projects/plantme.md", year: 2021, importance: "low" },
   { id: 7, name: "Feelings? Here is some music", description: "A music recommender system based on Facial Emotion Recognition", tags: ["Research", "2020", "AI", "Music"], file: "/projects/recommender.md", year: 2020 , importance: "medium" },
   { id: 8, name: "No more SAD",  description: "A tool for helping with Seasonal Addfective Disorder", tags: ["App Development", "Maker", "UX","2022" ], file: "/projects/sad.md", year: 2022, importance: "medium" },
-  { id: 9, name: "Tubularium",  description: "Musicking Artifact I", tags: ["2024", "2023", "Research", "Maker", "Publication", "Music", "Max/MSP", "AI"], file: "/projects/tubularium.md", year: 2024 , importance: "high" },
-  { id: 10, name: "Picnic",  description: "Musicking Artifact II", tags: ["2025", "2024", "Research", "Publication", "Music", "Max/MSP", "AI"], file: "/projects/picnic.md", year: 2025 , importance: "high" },
+  { id: 9, name: "Tubularium",  description: "Musicking Artefact I", tags: ["2024", "2023", "Research", "Maker", "Publication", "Interaction", "Music", "Max/MSP", "AI"], file: "/projects/tubularium.md", year: 2024 , importance: "high" },
+  { id: 10, name: "Picnic",  description: "Musicking Artefact II", tags: ["2025", "2024", "Research", "Publication", "Music", "Interaction", "Max/MSP", "AI"], file: "/projects/picnic.md", year: 2025 , importance: "high" },
   { id: 11, name: "Smooth hosting",  description: "Bang & Olufsen Hackaton", tags: ["2025", "Hackaton", "Music", "Max/MSP", "AI", "UX"], file: "/projects/hackatonb&o.md", year: 2025, importance: "medium" },
   { id: 12, name: "Genuary",  description: "Creative coding challenge", tags: ["2026", "Processing", "Creative Coding", "Procedural",], file: "/projects/genuary2026.md", year: 2026, importance: "medium" },
-
-
-  
+  { id: 13, name: "Table Manners",  description: "Musicking Artefact III", tags: ["2026", "Research", "Music", "Interaction"], file: "/projects/tablemanners.md", year: 2026, importance: "high" },
+  { id: 14, name: "Designing for Participatory Music-Making", description: "PhD Thesis in Interaction Design", tags: ["2026", "Research", "Music", "AI", "Playfulness", "Interaction"], file: "/projects/phdthesis.md", year: 2026, importance: "highMedium" }, 
 ];
-// { id: 10, name: "Picnic",  description: "Musicking Artifact II", tags: ["2025", "Research", "Publication", "Music", "Max/MSP", "AI"], file: "/projects/picnic.md", year: 2025 },
+// { id: 10, name: "Picnic",  description: "Musicking Artefact II", tags: ["2025", "Research", "Publication", "Music", "Max/MSP", "AI"], file: "/projects/picnic.md", year: 2025 },
 export const socialLinks = [
-  { descriptor: 'email', label: 'lumo@itu.dk', href: 'mailto:lumo@itu.dk' },
+  { descriptor: 'email', label: 'lulkamoon@gmail.com', href: 'mailto:lulkamoon@gmail.com'},
+  { descriptor: 'email2', label: 'lumo@itu.dk', href: 'mailto:lumo@itu.dk' },
   { descriptor: 'linkedin', label: 'luciamontesinos', href: 'https://www.linkedin.com/in/luciamontesinosgarcia/' },
-  { descriptor: 'email2', label: 'lulkamoon@gmail.com', href: 'mailto:lulkamoon@gmail.com'},
-  { descriptor: 'X', label: '@luciam0ntesin0s', href: 'https://x.com/luciam0ntesin0s' },
-  { descriptor: 'Instagram', label: '@luciam0ntesin0s', href: 'https://www.instagram.com/luciam0ntesin0s' },
+  { descriptor: 'x', label: '@luciam0ntesin0s', href: 'https://x.com/luciam0ntesin0s' },
+  { descriptor: 'instagram', label: '@luciam0ntesin0s', href: 'https://www.instagram.com/luciam0ntesin0s' },
   { descriptor: 'mobile', label: '0045 50146685', href: 'tel:+4550146685'}
 ];
 
