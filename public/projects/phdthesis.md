@@ -1,11 +1,11 @@
-My PhD is titled Designing for Participatory Music-making and explores, through a set of three desined artefacts, how to get people to engage in music-making. I did it at the IT University of Copenhagen. My defense is still pending. 
+My PhD is titled Designing for Participatory Music-making and explores, through a set of three designed artefacts, how to get people to engage in music-making. I did it at the IT University of Copenhagen. My defense is still pending. 
 
 ## About the project
 Many people believe music-making is reserved for the talented few. My PhD starts from the opposite view: music is something people do, from performing in a concert hall to humming to yourself, so taking part shouldn't depend on skill. I explored how to design for that through three projects. Each combined something I built with a study of how people actually played with it.
 
-**Tubularium***: a human-scale instrument of glowing tubes for making melodies with your whole body.
-**Picnic**: a picnic basket of everyday objects that you strike to build rhythms, with a machine-learning model that is wrong on purpose. Best Paper, ACM DIS 2026.
-**Table Manners**: giant dinnerware that people strike while voicing the sounds themselves.
+- **Tubularium**: a human-scale instrument of glowing tubes for making melodies with your whole body.
+- **Picnic**: a picnic basket of everyday objects that you strike to build rhythms, with a machine-learning model that is wrong on purpose. Best Paper, ACM DIS 2026.
+- **Table Manners**: giant dinnerware that people strike while voicing the sounds themselves.
 
 Across the three projects, two lessons stood out for designing experiences that anyone can join:
 **Invite, then support.** People first need a reason to start: something curious, familiar-but-strange, or simply fun. Once they've started, they need support that makes them feel capable. That support can be technical (scales and loops that make everything sound good), but it can also be social and experiential, such as an absurd setting that lowers the stakes.

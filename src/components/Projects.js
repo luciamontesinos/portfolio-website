@@ -250,8 +250,26 @@ const DetailsColumn = styled.div`
   flex-wrap: wrap;
 
 
+  /* flex items would shrink-wrap their text, so make every block full width to justify properly */
+  > * {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  p, li {
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    overflow-wrap: break-word;
+  }
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
+
+    p {
+      font-size: 17px;
+    }
   }
 
   h2 {
