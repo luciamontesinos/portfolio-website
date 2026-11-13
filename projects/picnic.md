@@ -10,7 +10,7 @@ Picnic facilitates participatory music-making by supporting participants in buil
 Picnic was evaluated with twenty-three participants in a lab setting and showcased as a demo in two conference venues.
 
 
-I have written three papers about Picnic, with one of them still in a peer-review process. Until I can share them, here is a bit about them:
+I have written three papers about Picnic, with one of them still in a peer-review process:
 - The first paper, ["Machine Learning as Design Material for Music-Making"](https://doi.org/10.1145/3800645.3812932) introduces Picnic and discusses, after its evaluation: i) how Picnic facilitates musicking and the challenges and opportunities that the design brings; ii) the role of ML as design material in creative domains, with the potential of facilitating new modes of AI-based interactions; and iii) reflections on how to design with AI for fostering critical engagement. It was awarded with Best Paper at ACM DIS 2026.
 
 - The second paper, still under peer review, discusses Picnic from a more-than-human perspective, exploring the design process around including bird calls. During the process I experienced an attunement to bird calls, which led me to want to design with them. In this paper, we discuss how the bird calls became boundary objects, and we raise design considerations for other designers wanting to work with more-than-human sounds.
