@@ -10,7 +10,7 @@ import { Section, SplideWrapper } from "../styles/shared";
 const tags = [...new Set(projectList.flatMap(p => p.tags))];
 
 // For sorting by importance
-const importanceOrder = { high: 4, highMedium: 3, medium: 2, low: 1 };
+const importanceOrder = { veryHigh: 5, high: 4, highMedium: 3, medium: 2, low: 1 };
 
 const FilterContainer = styled.div`
   display: ${({ isVisible }) => (isVisible ? "flex" : "none")};
