@@ -1,3 +1,6 @@
+// Higher = more important; used to order projects on both the home highlights and the project list
+export const importanceOrder = { ultraHigh: 6, veryHigh: 5, high: 4, highMedium: 3, medium: 2, low: 1 };
+
 export const projectList = [
   { id: 1, name: "Conversational User Interface", description: "Exploring CUIs in a 60s phone", tags: ["Maker", "Interaction", "2023"], file: "/projects/cui.md", year: 2023, importance: "high" },
   { id: 2, name: "Perlin's Fire",  description: "Procedurally generated frames of a fire", tags: ["Procedural", "Creative Coding", "2020"], file: "/projects/fire.md" , year: 2020, importance: "low" },
@@ -7,7 +10,7 @@ export const projectList = [
   { id: 6, name: "PlantMe",  description: "A wellbeing app", tags: ["UX", "App Development", "2021"], file: "/projects/plantme.md", year: 2021, importance: "low" },
   { id: 7, name: "Feelings? Here is some music", description: "A music recommender system based on Facial Emotion Recognition", tags: ["Research", "2020", "AI", "Music"], file: "/projects/recommender.md", year: 2020 , importance: "medium" },
   { id: 8, name: "No more SAD",  description: "A tool for helping with Seasonal Affective Disorder", tags: ["App Development", "Maker", "UX","2022" ], file: "/projects/sad.md", year: 2022, importance: "medium" },
-  { id: 9, name: "Tubularium",  description: "Musicking Artefact I", tags: ["2024", "2023", "Research", "Maker", "Publication", "Interaction", "Music", "Max/MSP", "AI"], file: "/projects/tubularium.md", year: 2024 , importance: "veryHigh" },
+  { id: 9, name: "Tubularium",  description: "Musicking Artefact I", tags: ["2024", "2023", "Research", "Maker", "Publication", "Interaction", "Music", "Max/MSP", "AI"], file: "/projects/tubularium.md", year: 2024 , importance: "ultraHigh" },
   { id: 10, name: "Picnic",  description: "Musicking Artefact II", tags: ["2025", "2024", "Research", "Publication", "Music", "Interaction", "Max/MSP", "AI"], file: "/projects/picnic.md", year: 2025 , importance: "veryHigh" },
   { id: 11, name: "Smooth hosting",  description: "Bang & Olufsen Hackathon", tags: ["2025", "Hackaton", "Music", "Max/MSP", "AI", "UX"], file: "/projects/hackatonb&o.md", year: 2025, importance: "medium" },
   { id: 12, name: "Genuary",  description: "Creative coding challenge", tags: ["2026", "Processing", "Creative Coding", "Procedural",], file: "/projects/genuary2026.md", year: 2026, importance: "medium" },

@@ -4,6 +4,7 @@ import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
 import "@splidejs/splide/css";
 import { Section, SplideWrapper } from "../styles/shared";
+import { projectList, importanceOrder } from "../data";
 
 const CoverflowContainer = styled.div`
   width: 100%;
@@ -223,8 +224,8 @@ const spreadLayout = [
 const CLICK_DRAG_THRESHOLD = 6; // px of movement before a press counts as a drag rather than a click
 
 function Home({ setExpandedProject }) {
-  // Left to right on desktop: Picnic, Tubularium, Kinetip, Conversational User Interface, Table Manners
-  const highlights = [
+  // Highlights are shown in importance order (see sorting below), left to right on desktop
+  const highlightList = [
     {
       image: "https://pub-5ceae6c59ca74b43a15bb310c05194ab.r2.dev/images/picnic4.png",
       projectId: 10,
@@ -266,6 +267,17 @@ function Home({ setExpandedProject }) {
       year: 2026,
     },
   ];
+
+  // Order by the project's importance (then newest first), same as the project list
+  const rank = (h) => {
+    const p = projectList.find((x) => x.id === h.projectId) || {};
+    return { imp: importanceOrder[p.importance] || 0, year: p.year || h.year };
+  };
+  const highlights = [...highlightList].sort((a, b) => {
+    const ra = rank(a);
+    const rb = rank(b);
+    return rb.imp - ra.imp || rb.year - ra.year;
+  });
 
   const [cards, setCards] = useState(
     highlights.map((h, i) => {
@@ -458,8 +470,7 @@ function Home({ setExpandedProject }) {
             pagination: true,
           }}
         >
-          {highlights.slice()
-  .sort((a, b) => b.projectId - a.projectId).map((highlight, index) => (
+          {highlights.map((highlight, index) => (
             <SplideSlide key={index}>
               <CarouselCard
                 onClick={() => {
